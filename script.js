@@ -1,3 +1,5 @@
+import { GoogleGenAI } from 'https://esm.run/@google/genai';
+
 // *******************************************************************
 // SECURITY WARNING: The API key below is PUBLICLY VISIBLE on GitHub Pages.
 // REMOVE THIS KEY IMMEDIATELY after your demonstration is complete.
@@ -6,7 +8,7 @@
 const apiKey = 'AIzaSyCqTHjq48mqB8tXC9G2qsefsrqnQ2JQjVg';
 const model = "gemini-2.5-flash"; 
 
-// Declare variables globally, but don't initialize yet
+// Declare variables globally
 let ai;
 let chat;
 let sendButton;
@@ -18,9 +20,9 @@ let chatMessages;
 // -------------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
     
-    // CRITICAL FIX: Initialize AI, Chat, and Elements inside this block.
+    // CRITICAL FIX: GoogleGenAI is now imported and available here.
     try {
-        // Initialize AI using the globally available object
+        // Initialize AI using the imported class
         ai = new GoogleGenAI({apiKey: apiKey});
         
         chat = ai.chats.create({ 
@@ -30,12 +32,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // 2. HTML Element References (Now guaranteed to find the elements)
+        // 2. HTML Element References
         sendButton = document.getElementById('send-button');
         userInput = document.getElementById('user-input');
         chatMessages = document.getElementById('chat-messages');
 
-        // 3. Event Listeners (Now guaranteed to attach to the elements)
+        // 3. Event Listeners
         sendButton.addEventListener('click', sendMessage);
         userInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -44,15 +46,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Initial Welcome Message
-        setTimeout(() => {
-            appendMessage('Hello! I am the Dermato AI Assistant, powered by Gemini. I can help answer questions about your project design or general inquiries. What can I do for you?', 'ai');
-        }, 100);
+        // Removed the welcome message from HTML and relying on the script one
+        appendMessage('Hello! I am the Dermato AI Assistant, powered by Gemini. I can help answer questions about your project design or general inquiries. What can I do for you?', 'ai');
 
     } catch (e) {
         // If the SDK still failed to load, display an obvious error in the chat
         console.error("Initialization Failed:", e);
         document.getElementById('chat-messages').innerHTML = 
-            '<div class="message ai-message"><div class="message-text">FATAL ERROR: AI failed to initialize. Please ensure the Gemini SDK script tag is present in your index.html.</div></div>';
+            '<div class="message ai-message"><div class="message-text">FATAL ERROR: AI failed to initialize. Please ensure the Gemini SDK script tag is present in your index.html and loaded as a module.</div></div>';
     }
 });
 
@@ -94,6 +95,7 @@ async function callAIApi(userMessage) {
         }
     }
     
+    // Replace "AI is thinking..." with the actual response
     loadingElement.querySelector('.message-text').textContent = aiResponseText;
 
     userInput.disabled = false;
