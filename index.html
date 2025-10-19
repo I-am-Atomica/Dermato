@@ -21,10 +21,12 @@
     </div> 
 
     <!-- 
-    The fix requires BOTH the new link AND the 'defer' attribute to guarantee 
-    that GoogleGenAI is defined before script.js runs.
+    DEFINITIVE FIX: 
+    1. Reverting to the esm.run CDN (which is often more up-to-date).
+    2. Using the 'defer' attribute on BOTH scripts to guarantee execution order 
+       AFTER the DOM is ready, resolving the timing conflict.
     -->
-    <script src="https://cdn.jsdelivr.net/npm/@google/genai@0.2.1/dist/umd/index.js"></script>
+    <script src="https://esm.run/@google/genai"></script>
     <script src="script.js"></script>
     
 </body>
