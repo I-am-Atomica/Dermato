@@ -1,8 +1,7 @@
 // *******************************************************************
-// 🚨 SECURITY WARNING: The API key below is PUBLICLY VISIBLE on GitHub Pages.
+// SECURITY WARNING: The API key below is PUBLICLY VISIBLE on GitHub Pages.
 // REMOVE THIS KEY IMMEDIATELY after your demonstration is complete.
 // *******************************************************************
-// FIX: Variables are now declared globally, but initialized inside DOMContentLoaded.
 
 const apiKey = 'AIzaSyCqTHjq48mqB8tXC9G2qsefsrqnQ2JQjVg';
 const model = "gemini-2.5-flash"; 
@@ -15,13 +14,13 @@ let userInput;
 let chatMessages;
 
 // -------------------------------------------------------------------
-// 1. All Initialization runs after the HTML structure is complete
+// 1. Initialization runs ONLY after the HTML structure is complete
 // -------------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
     
-    // ⚠️ CRITICAL FIX: Initialize AI and Chat NOW. This runs after the HTML
-    // and the external Gemini SDK script have loaded.
+    // CRITICAL FIX: Initialize AI, Chat, and Elements inside this block.
     try {
+        // Initialize AI using the globally available object
         ai = new GoogleGenAI({apiKey: apiKey});
         
         chat = ai.chats.create({ 
@@ -52,9 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {
         // If the SDK still failed to load, display an obvious error in the chat
         console.error("Initialization Failed:", e);
-        // This is a direct element reference, safe to use immediately
         document.getElementById('chat-messages').innerHTML = 
-            '<div class="message ai-message"><div class="message-text">FATAL ERROR: AI failed to initialize. Please check the Developer Console (F12) for the exact error, and ensure your index.html script tags are correct.</div></div>';
+            '<div class="message ai-message"><div class="message-text">FATAL ERROR: AI failed to initialize. Please ensure the Gemini SDK script tag is present in your index.html.</div></div>';
     }
 });
 
