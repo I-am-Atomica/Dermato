@@ -8,7 +8,7 @@
 import { GoogleGenAI } from '@google/genai';
 
 // Initialize the GoogleGenAI instance with your API Key
-const ai = new GoogleGenAI({apiKey: 'YOUR_API_KEY_HERE'});
+const ai = new GoogleGenAI({apiKey: 'AIzaSyCqTHjq48mqB8tXC9G2qsefsrqnQ2JQjVg'});
 const model = "gemini-2.5-flash"; // A fast and capable model for chat
 
 // Initialize chat session history
