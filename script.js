@@ -1,3 +1,4 @@
+// *** CRITICAL FIX: Import GoogleGenAI as it's an ES Module ***
 import { GoogleGenAI } from 'https://esm.run/@google/genai';
 
 // *******************************************************************
@@ -20,15 +21,16 @@ let chatMessages;
 // -------------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
     
-    // CRITICAL FIX: GoogleGenAI is now imported and available here.
+    // GoogleGenAI is now imported and available here.
     try {
         // Initialize AI using the imported class
         ai = new GoogleGenAI({apiKey: apiKey});
         
+        // Define the AI's persona and instruction set
         chat = ai.chats.create({ 
             model: model,
             config: {
-                systemInstruction: "You are the Dermato AI Assistant, a friendly and helpful large language model. Your responses should be concise, professional, and focus on providing useful information while maintaining a supportive tone. You are here to answer questions about the user's web development projects, the design, and any general inquiries."
+                systemInstruction: "You are the Dermato AI Assistant, a friendly and helpful large language model. Your responses should be concise, professional, and focus on providing useful information about skincare, dermatology, and cosmetic science while maintaining a supportive tone. If a question is outside the scope of skincare or web development, politely redirect the user to the core topics."
             }
         });
 
@@ -46,14 +48,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Initial Welcome Message
-        // Removed the welcome message from HTML and relying on the script one
-        appendMessage('Hello! I am the Dermato AI Assistant, powered by Gemini. I can help answer questions about your project design or general inquiries. What can I do for you?', 'ai');
+        appendMessage('Hello! I am the Dermato AI Assistant, powered by Gemini. How can I assist you with your skincare questions or project design today?', 'ai');
 
     } catch (e) {
-        // If the SDK still failed to load, display an obvious error in the chat
+        // Fallback for initialization failure
         console.error("Initialization Failed:", e);
         document.getElementById('chat-messages').innerHTML = 
-            '<div class="message ai-message"><div class="message-text">FATAL ERROR: AI failed to initialize. Please ensure the Gemini SDK script tag is present in your index.html and loaded as a module.</div></div>';
+            '<div class="message ai-message"><div class="message-text">FATAL ERROR: AI failed to initialize. Ensure the Gemini SDK script tag uses type="module" and GoogleGenAI is imported in script.js.</div></div>';
     }
 });
 
@@ -63,14 +64,13 @@ document.addEventListener('DOMContentLoaded', () => {
 // -------------------------------------------------------------------
 
 function sendMessage() {
-    // Rely on the now-initialized global variables
     const userMessage = userInput.value.trim(); 
     if (userMessage === '') return;
 
     appendMessage(userMessage, 'user');
     
     userInput.value = '';
-    userInput.disabled = true;
+    userInput.disabled = true; // Disable input while waiting for AI
     sendButton.disabled = true;
 
     callAIApi(userMessage);
@@ -79,6 +79,7 @@ function sendMessage() {
 async function callAIApi(userMessage) {
     let aiResponseText = "An error occurred while connecting to the AI. Please check your network connection.";
     
+    // Add a temporary "loading" message
     let loadingElement = appendMessage('AI is thinking...', 'ai');
     
     try {
@@ -88,6 +89,7 @@ async function callAIApi(userMessage) {
     } catch (error) {
         console.error("Gemini API Call Failed:", error);
         
+        // Provide more helpful error messages
         if (error.message && error.message.includes('API_KEY_INVALID')) {
             aiResponseText = "Authentication error: The API key might be invalid or restricted. Check your console for details.";
         } else {
@@ -95,13 +97,15 @@ async function callAIApi(userMessage) {
         }
     }
     
-    // Replace "AI is thinking..." with the actual response
+    // Replace the "loading" message with the actual response
     loadingElement.querySelector('.message-text').textContent = aiResponseText;
 
+    // Re-enable input
     userInput.disabled = false;
     sendButton.disabled = false;
     userInput.focus(); 
 
+    // Scroll to the bottom to view the new message
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
@@ -110,17 +114,19 @@ async function callAIApi(userMessage) {
 // -------------------------------------------------------------------
 
 function appendMessage(text, sender) {
-    // Rely on the now-initialized global variables
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message', `${sender}-message`);
 
     const textDiv = document.createElement('div');
     textDiv.classList.add('message-text');
+    
+    // Safely replace text content
     textDiv.textContent = text;
 
     messageDiv.appendChild(textDiv);
     chatMessages.appendChild(messageDiv);
     
+    // Scroll to the bottom
     chatMessages.scrollTop = chatMessages.scrollHeight;
     
     return messageDiv;
