@@ -2,113 +2,115 @@
 // 🚨 SECURITY WARNING: The API key below is PUBLICLY VISIBLE on GitHub Pages.
 // REMOVE THIS KEY IMMEDIATELY after your demonstration is complete.
 // *******************************************************************
-// FIX: We rely on the global object loaded by the CDN link in index.html.
+// FIX: Variables are now declared globally, but initialized inside DOMContentLoaded.
 
-// Initialize the GoogleGenAI instance with the provided API Key
-// NOTE: The GoogleGenAI object is available globally when using the esm.run link.
 const apiKey = 'AIzaSyCqTHjq48mqB8tXC9G2qsefsrqnQ2JQjVg';
-const ai = new GoogleGenAI({apiKey: apiKey});
 const model = "gemini-2.5-flash"; 
 
-// Initialize chat session history to maintain context
-const chat = ai.chats.create({ 
-    model: model,
-    // System instruction to give the AI a persona relevant to your project name
-    config: {
-        systemInstruction: "You are the Dermato AI Assistant, a friendly and helpful large language model. Your responses should be concise, professional, and focus on providing useful information while maintaining a supportive tone. You are here to answer questions about the user's web development projects, the design, and any general inquiries."
-    }
-});
+// Declare variables globally, but don't initialize yet
+let ai;
+let chat;
+let sendButton;
+let userInput;
+let chatMessages;
 
 // -------------------------------------------------------------------
-// 1. HTML Element References
+// 1. All Initialization runs after the HTML structure is complete
 // -------------------------------------------------------------------
-const sendButton = document.getElementById('send-button');
-const userInput = document.getElementById('user-input');
-const chatMessages = document.getElementById('chat-messages');
-
-// -------------------------------------------------------------------
-// 2. Event Listeners and Initial Setup
-// -------------------------------------------------------------------
-
-// Listen for button click and Enter key press
-sendButton.addEventListener('click', sendMessage);
-userInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        sendMessage();
-    }
-});
-
-// Initial Welcome Message from the AI on page load
 document.addEventListener('DOMContentLoaded', () => {
-    // Add a small delay to ensure the chat box CSS is fully applied before the first message
-    setTimeout(() => {
-        appendMessage('Hello! I am the Dermato AI Assistant, powered by Gemini. I can help answer questions about your project design or general inquiries. What can I do for you?', 'ai');
-    }, 100);
+    
+    // ⚠️ CRITICAL FIX: Initialize AI and Chat NOW. This runs after the HTML
+    // and the external Gemini SDK script have loaded.
+    try {
+        ai = new GoogleGenAI({apiKey: apiKey});
+        
+        chat = ai.chats.create({ 
+            model: model,
+            config: {
+                systemInstruction: "You are the Dermato AI Assistant, a friendly and helpful large language model. Your responses should be concise, professional, and focus on providing useful information while maintaining a supportive tone. You are here to answer questions about the user's web development projects, the design, and any general inquiries."
+            }
+        });
+
+        // 2. HTML Element References (Now guaranteed to find the elements)
+        sendButton = document.getElementById('send-button');
+        userInput = document.getElementById('user-input');
+        chatMessages = document.getElementById('chat-messages');
+
+        // 3. Event Listeners (Now guaranteed to attach to the elements)
+        sendButton.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Initial Welcome Message
+        setTimeout(() => {
+            appendMessage('Hello! I am the Dermato AI Assistant, powered by Gemini. I can help answer questions about your project design or general inquiries. What can I do for you?', 'ai');
+        }, 100);
+
+    } catch (e) {
+        // If the SDK still failed to load, display an obvious error in the chat
+        console.error("Initialization Failed:", e);
+        // This is a direct element reference, safe to use immediately
+        document.getElementById('chat-messages').innerHTML = 
+            '<div class="message ai-message"><div class="message-text">FATAL ERROR: AI failed to initialize. Please check the Developer Console (F12) for the exact error, and ensure your index.html script tags are correct.</div></div>';
+    }
 });
 
 
 // -------------------------------------------------------------------
-// 3. Core Logic: Sending Message and Calling API
+// 4. Core Logic: Sending Message and Calling API
 // -------------------------------------------------------------------
 
 function sendMessage() {
-    const userMessage = userInput.value.trim();
+    // Rely on the now-initialized global variables
+    const userMessage = userInput.value.trim(); 
     if (userMessage === '') return;
 
-    // Display user's message immediately
     appendMessage(userMessage, 'user');
     
-    // Clear input and disable elements while waiting for API
     userInput.value = '';
     userInput.disabled = true;
     sendButton.disabled = true;
 
-    // Call the API
     callAIApi(userMessage);
 }
 
 async function callAIApi(userMessage) {
     let aiResponseText = "An error occurred while connecting to the AI. Please check your network connection.";
     
-    // Display a temporary 'thinking' message
     let loadingElement = appendMessage('AI is thinking...', 'ai');
     
     try {
-        // Send the user's message to the chat session
         const response = await chat.sendMessage({ message: userMessage });
-
-        // Get the response text
         aiResponseText = response.text; 
 
     } catch (error) {
         console.error("Gemini API Call Failed:", error);
         
-        // Provide more helpful error message if the API key is the issue
         if (error.message && error.message.includes('API_KEY_INVALID')) {
             aiResponseText = "Authentication error: The API key might be invalid or restricted. Check your console for details.";
         } else {
              aiResponseText = "An unexpected error occurred. See console for details.";
         }
-
     }
     
-    // Update the 'thinking' message with the final AI response
     loadingElement.querySelector('.message-text').textContent = aiResponseText;
 
-    // Re-enable input and button
     userInput.disabled = false;
     sendButton.disabled = false;
     userInput.focus(); 
 
-    // Scroll to the bottom to see the newest message
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
 // -------------------------------------------------------------------
-// 4. Helper Function: Append Message to Chat Window
+// 5. Helper Function: Append Message to Chat Window
 // -------------------------------------------------------------------
 
 function appendMessage(text, sender) {
+    // Rely on the now-initialized global variables
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message', `${sender}-message`);
 
@@ -119,9 +121,7 @@ function appendMessage(text, sender) {
     messageDiv.appendChild(textDiv);
     chatMessages.appendChild(messageDiv);
     
-    // Scroll to the bottom
     chatMessages.scrollTop = chatMessages.scrollHeight;
     
-    // Return the element for later modification (e.g., updating 'thinking...')
     return messageDiv;
 }
