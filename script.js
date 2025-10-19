@@ -2,9 +2,10 @@
 // 🚨 SECURITY WARNING: The API key below is PUBLICLY VISIBLE on GitHub Pages.
 // REMOVE THIS KEY IMMEDIATELY after your demonstration is complete.
 // *******************************************************************
-import { GoogleGenAI } from '@google/genai';
+// FIX: We rely on the global object loaded by the CDN link in index.html.
 
 // Initialize the GoogleGenAI instance with the provided API Key
+// NOTE: The GoogleGenAI object is available globally when using the esm.run link.
 const apiKey = 'AIzaSyCqTHjq48mqB8tXC9G2qsefsrqnQ2JQjVg';
 const ai = new GoogleGenAI({apiKey: apiKey});
 const model = "gemini-2.5-flash"; 
@@ -81,6 +82,7 @@ async function callAIApi(userMessage) {
 
     } catch (error) {
         console.error("Gemini API Call Failed:", error);
+        
         // Provide more helpful error message if the API key is the issue
         if (error.message && error.message.includes('API_KEY_INVALID')) {
             aiResponseText = "Authentication error: The API key might be invalid or restricted. Check your console for details.";
