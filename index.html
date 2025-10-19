@@ -11,13 +11,23 @@
     <div class="chat-container">
         <h1>Dermato</h1>
         <div class="chat-messages" id="chat-messages">
-            </div> 
+            <!-- Messages will be injected here by script.js -->
+        </div> 
         <div class="chat-input">
             <input type="text" id="user-input" placeholder="Ask your question here..." />
             <button id="send-button">Send</button>
         </div>
     </div> 
 
+    <!-- 
+    *** CRITICAL FIX: type="module" ADDED TO BOTH SCRIPTS ***
+    
+    1. The Gemini SDK is an ES Module and MUST be loaded with type="module".
+    2. Your local script.js must also be type="module" to use the 'import' 
+       statement to get the GoogleGenAI class.
+    
+    The 'defer' attribute is now redundant, as modules are deferred by default.
+    -->
     <script type="module" src="https://esm.run/@google/genai"></script>
     <script type="module" src="script.js"></script>
     
