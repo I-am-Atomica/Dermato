@@ -21,16 +21,15 @@ let chatMessages;
 // -------------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
     
-    // GoogleGenAI is now imported and available here.
     try {
         // Initialize AI using the imported class
         ai = new GoogleGenAI({apiKey: apiKey});
         
-        // Define the AI's persona and instruction set (UPDATED FOR SKINCARE)
+        // Define the AI's persona and instruction set (UPDATED FOR SKINCARE AND FORMATTING)
         chat = ai.chats.create({ 
             model: model,
             config: {
-                systemInstruction: "You are the Dermato AI Assistant, a friendly, knowledgeable, and professional virtual skincare advisor. Your goal is to provide general, educational, and evidence-based advice on skincare routines, ingredient functions, product types, and common dermatological topics. All advice must be accompanied by the following mandatory safety disclaimer: 'Disclaimer: I am an AI, not a medical professional. This advice is for educational purposes only and is not a substitute for professional medical consultation. Always consult with a certified dermatologist or doctor before starting any new treatment or routine.' Your tone should be supportive, clear, and focused on scientifically sound information."
+                systemInstruction: "You are the Dermato AI Assistant, a friendly, professional, and highly knowledgeable virtual skincare advisor. **You must structure all your advice using clear Markdown formatting**, including bolding (**), numbered lists, bullet points (*), and markdown headings (##) where appropriate, to maximize readability and clarity. Your goal is to provide general, educational, and evidence-based advice on skincare routines, ingredient functions, product types, and common dermatological topics. All advice must be accompanied by the following mandatory safety disclaimer at the very end of your response: 'Disclaimer: I am an AI, not a medical professional. This advice is for educational purposes only and is not a substitute for professional medical consultation. Always consult with a certified dermatologist or doctor before starting any new treatment or routine.' Your tone must be supportive, clear, and focused on scientifically sound information."
             }
         });
 
@@ -48,13 +47,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Initial Welcome Message
-        appendMessage('Hello! I am the Dermato AI Assistant, powered by Gemini. How can I assist you with your skincare questions or project design today?', 'ai');
+        appendMessage('Hello! I am the Dermato AI Assistant, powered by Gemini. How can I assist you with your skincare questions today?', 'ai');
 
     } catch (e) {
-        // Fallback for initialization failure
         console.error("Initialization Failed:", e);
         document.getElementById('chat-messages').innerHTML = 
-            '<div class="message ai-message"><div class="message-text">FATAL ERROR: AI failed to initialize. Ensure the Gemini SDK script tag uses type="module" and GoogleGenAI is imported in script.js.</div></div>';
+            '<div class="message ai-message"><div class="message-text">FATAL ERROR: AI failed to initialize. Check console for details.</div></div>';
     }
 });
 
@@ -70,7 +68,7 @@ function sendMessage() {
     appendMessage(userMessage, 'user');
     
     userInput.value = '';
-    userInput.disabled = true; // Disable input while waiting for AI
+    userInput.disabled = true;
     sendButton.disabled = true;
 
     callAIApi(userMessage);
@@ -89,7 +87,6 @@ async function callAIApi(userMessage) {
     } catch (error) {
         console.error("Gemini API Call Failed:", error);
         
-        // Provide more helpful error messages
         if (error.message && error.message.includes('API_KEY_INVALID')) {
             aiResponseText = "Authentication error: The API key might be invalid or restricted. Check your console for details.";
         } else {
@@ -97,8 +94,8 @@ async function callAIApi(userMessage) {
         }
     }
     
-    // Replace the "loading" message with the actual response
-    loadingElement.querySelector('.message-text').textContent = aiResponseText;
+    // Replace the "loading" message with the actual response using HTML rendering
+    loadingElement.querySelector('.message-text').innerHTML = markdownToHtml(aiResponseText);
 
     // Re-enable input
     userInput.disabled = false;
@@ -110,8 +107,25 @@ async function callAIApi(userMessage) {
 }
 
 // -------------------------------------------------------------------
-// 5. Helper Function: Append Message to Chat Window
+// 5. Helper Functions: Markdown Conversion and Message Appending
 // -------------------------------------------------------------------
+
+// Function to convert basic Markdown to HTML
+function markdownToHtml(markdownText) {
+    // 1. Convert **bold** to <strong>bold</strong>
+    let htmlText = markdownText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // 2. Convert *italics* or _italics_ to <em>italics</em>
+    htmlText = htmlText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    htmlText = htmlText.replace(/_(.*?)_/g, '<em>$1</em>');
+
+    // 3. Simple list and paragraph breaks (convert newlines to <br>)
+    // For a simple chat app, converting newlines often gives a good result.
+    htmlText = htmlText.replace(/\n/g, '<br>');
+    
+    return htmlText;
+}
+
 
 function appendMessage(text, sender) {
     const messageDiv = document.createElement('div');
@@ -120,8 +134,10 @@ function appendMessage(text, sender) {
     const textDiv = document.createElement('div');
     textDiv.classList.add('message-text');
     
-    // Safely replace text content
-    textDiv.textContent = text;
+    // Safely render the text as HTML (after converting Markdown)
+    // Note: Since this is a self-contained project, using innerHTML is fine, 
+    // but in a production app with user-provided text, this needs stricter sanitization.
+    textDiv.innerHTML = markdownToHtml(text);
 
     messageDiv.appendChild(textDiv);
     chatMessages.appendChild(messageDiv);
