@@ -4,43 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Chat Interface</title>
-    <!-- Links to your custom stylesheet -->
     <link rel="stylesheet" href="dermato.css"> 
 </head>
 <body>
 
     <div class="chat-container">
-        
         <h1>Dermato</h1>
-
-        <!-- 1. Scrollable Message History Area -->
         <div class="chat-messages" id="chat-messages">
-            
-            <div class="message ai-message">
-                <div class="message-text">Hello! I am the Dermato AI Assistant. How can I help you today?</div>
-            </div>
-            
-            <div class="message user-message">
-                <div class="message-text">I have a question about my project.</div>
-            </div>
-
+            <div class="message ai-message"><div class="message-text">Hello! I am the Dermato AI Assistant. How can I help you today?</div></div>
+            <div class="message user-message"><div class="message-text">I have a question about my project.</div></div>
         </div> 
-        
-        <!-- 2. Input and Send Button Area -->
         <div class="chat-input">
             <input type="text" id="user-input" placeholder="Ask your question here..." />
             <button id="send-button">Send</button>
         </div>
-
     </div> 
 
     <!-- 
-    DEFINITIVE FIX: 
-    Using 'defer' ensures both scripts are loaded non-blocking (good for performance) 
-    and, crucially, guarantees they execute in the order they appear *after* the DOM is loaded. 
-    This is the only way to reliably resolve the "GoogleGenAI is not defined" error.
+    The fix requires BOTH the new link AND the 'defer' attribute to guarantee 
+    that GoogleGenAI is defined before script.js runs.
     -->
-    <script src="https://esm.run/@google/genai"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@google/genai@0.2.1/dist/umd/index.js"></script>
     <script src="script.js"></script>
     
 </body>
