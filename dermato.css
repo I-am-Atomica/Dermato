@@ -1,24 +1,27 @@
 /*
- *  Calming Dark Mode CSS - Single File for GitHub Pages
+ * Calming Dark Mode CSS - Chat Interface Focus
  * --------------------------------------------------------
  * Theme: Muted natural colors (forest green, moss, earth)
- * Layout: Flexbox & Grid for full responsiveness
- * Features: Fixed Navigation Bar, Internal Anchor support, High Contrast
+ * Layout: Full-screen centered chat box
+ * Features: High Contrast, Scrollable message area
  */
 
 /* ======================================================================
-   1. ROOT VARIABLES & GLOBAL RESET
+   1. ROOT VARIABLES & GLOBAL RESET (Colors & Typography kept)
    ====================================================================== */
-   :root {
-    /*  Color Palette */
+:root {
+    /* Color Palette (Kept) */
     --color-dark-bg: #1A2421;      /* Deep Forest Green/Near Black for background */
-    --color-primary: #386641;      /* Muted Forest Green for accents/nav */
-    --color-secondary: #A7C957;    /* Soft Moss Green for highlights/buttons */
-    --color-text-light: #E0F2E9;   /* Very light, off-white for main text */
-    --color-text-muted: #BCCEC9;   /* Muted gray-green for secondary text */
-    --color-border: #405757;       /* Subtle Earthy Border color */
-
-    /*  Spacing & Typography */
+    --color-primary: #386641;      /* Muted Forest Green for chat input/accents */
+    --color-secondary: #A7C957;    /* Soft Moss Green for user messages/highlights */
+    --color-text-light: #E0F2E9;    /* Very light, off-white for main text */
+    --color-text-muted: #BCCEC9;    /* Muted gray-green for secondary text */
+    --color-border: #405757;        /* Subtle Earthy Border color */
+    
+    /* NEW: AI Message Color */
+    --color-ai-bubble: #283C36;   /* Darker shade for AI messages */
+    
+    /* Spacing & Typography (Kept) */
     --spacing-xs: 0.5rem;
     --spacing-sm: 1rem;
     --spacing-md: 1.5rem;
@@ -26,12 +29,12 @@
     --font-body: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     --font-heading: 'Georgia', serif;
 
-    /*  Layout */
-    --nav-height: 4rem;
-    --max-width: 1200px;
+    /* Layout (Adjusted) */
+    --chat-width: 800px;
+    --chat-height: 90vh;
 }
 
-/* Global Reset & Base Styles */
+/* Global Reset & Base Styles (Kept) */
 *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
@@ -39,7 +42,7 @@
 }
 
 html {
-    scroll-behavior: smooth; /* Smooth scrolling for internal anchors */
+    scroll-behavior: smooth;
 }
 
 body {
@@ -48,23 +51,20 @@ body {
     background-color: var(--color-dark-bg);
     color: var(--color-text-light);
     min-height: 100vh;
+    display: flex; /* Flexbox for centering the chat box */
+    justify-content: center;
+    align-items: center;
+    padding: var(--spacing-md);
 }
 
 /* ======================================================================
-   2. TYPOGRAPHY & TEXT CONTRAST
+   2. TYPOGRAPHY & TEXT CONTRAST (Simplified for chat)
    ====================================================================== */
-h1, h2, h3, h4 {
+h1 { 
     font-family: var(--font-heading);
     color: var(--color-secondary);
-    margin-bottom: var(--spacing-sm);
-    line-height: 1.2;
-}
-
-h1 { font-size: 2.5rem; }
-h2 { font-size: 2rem; border-bottom: 2px solid var(--color-border); padding-bottom: var(--spacing-xs); }
-h3 { font-size: 1.5rem; color: var(--color-text-light); }
-
-p {
+    font-size: 2rem;
+    text-align: center;
     margin-bottom: var(--spacing-md);
 }
 
@@ -79,177 +79,127 @@ a:hover {
     text-decoration: underline;
 }
 
-/* Button/Call-to-Action Styling */
-.btn {
-    display: inline-block;
-    padding: var(--spacing-xs) var(--spacing-md);
-    background-color: var(--color-secondary);
-    color: var(--color-dark-bg); /* High contrast text on button */
-    border-radius: 4px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: background-color 0.3s ease, transform 0.1s ease;
-}
-
-.btn:hover {
-    background-color: #C5E379; /* Slightly lighter on hover */
-    text-decoration: none;
-    transform: translateY(-1px);
-}
-
 /* ======================================================================
-   3. NAVIGATION BAR (Fixed & Responsive)
-   ====================================================================== */
-.nav-bar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: var(--nav-height);
-    background-color: var(--color-primary); /* Muted Forest Green background */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-    z-index: 1000;
-
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 var(--spacing-md);
-}
-
-.nav-logo {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: var(--color-text-light);
-    text-transform: uppercase;
-}
-
-.nav-links {
-    list-style: none;
-    display: flex;
-    gap: var(--spacing-md);
-}
-
-.nav-links a {
-    color: var(--color-text-light);
-    padding: 0.5rem 0;
-    transition: color 0.3s ease;
-    text-transform: capitalize;
-}
-
-.nav-links a:hover {
-    color: var(--color-secondary);
-    text-decoration: none;
-}
-
-/* ======================================================================
-   4. MAIN CONTENT LAYOUT & SECTIONS
-   ====================================================================== */
-/* Content wrapper to account for the fixed nav bar */
-.content-wrapper {
-    padding-top: var(--nav-height); /* Offset for fixed nav */
-    max-width: var(--max-width);
-    margin: 0 auto; /* Center the main content */
-    padding-left: var(--spacing-md);
-    padding-right: var(--spacing-md);
-}
-
-section {
-    padding: var(--spacing-lg) 0; /* Vertical padding for all main sections */
-    min-height: calc(100vh - var(--nav-height)); /* Ensure sections take up at least most of the viewport */
-}
-
-/* Internal Anchor Target Padding (prevents content being hidden under fixed nav) */
-:target::before {
-    content: "";
-    display: block;
-    height: var(--nav-height);
-    margin: calc(var(--nav-height) * -1) 0 0;
-}
-
-/* Generic Card/Box Style for sub-content */
-.card {
-    background-color: var(--color-dark-bg);
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    padding: var(--spacing-md);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease;
-}
-
-.card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-}
-
-/* ======================================================================
-   5. GRID & FLEXBOX LAYOUTS (Responsiveness)
+   3. CHAT INTERFACE STRUCTURE
    ====================================================================== */
 
-/* Utility for a main content grid (e.g., for features, projects) */
-.grid-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid */
-    gap: var(--spacing-md);
-    margin-top: var(--spacing-md);
-}
-
-/* Example: Hero/Header Section using Flexbox */
-#home {
+.chat-container {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    min-height: calc(100vh - var(--nav-height));
-    background-image: linear-gradient(rgba(26, 36, 33, 0.8), rgba(26, 36, 33, 0.9)),
-                      url('path/to/subtle-earth-texture.jpg'); /* Replace with a subtle background image if desired, or remove */
-    background-size: cover;
+    width: 100%;
+    max-width: var(--chat-width);
+    height: var(--chat-height);
+    background-color: var(--color-ai-bubble); /* Slightly lighter background for the chat window */
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    overflow: hidden; /* Contains children */
+}
+
+/* Message Display Area */
+.chat-messages {
+    flex-grow: 1; /* Takes up all available vertical space */
+    padding: var(--spacing-md);
+    overflow-y: auto; /* Enables scrolling for messages */
+    border-bottom: 1px solid var(--color-border);
+}
+
+/* Scrollbar styling for a cleaner look */
+.chat-messages::-webkit-scrollbar {
+    width: 8px;
+}
+.chat-messages::-webkit-scrollbar-thumb {
+    background-color: var(--color-border);
+    border-radius: 10px;
+}
+.chat-messages::-webkit-scrollbar-track {
+    background: var(--color-ai-bubble);
+}
+
+/* Message Bubble Styling */
+.message {
+    display: flex;
+    margin-bottom: var(--spacing-sm);
+}
+
+.message-text {
+    max-width: 75%;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: 18px;
+    line-height: 1.4;
+    word-wrap: break-word; /* Ensures long words don't break layout */
+}
+
+.user-message {
+    justify-content: flex-end; /* Align user messages to the right */
+}
+
+.user-message .message-text {
+    background-color: var(--color-secondary); /* Moss Green for User */
+    color: var(--color-dark-bg); /* Dark text on light background */
+    border-bottom-right-radius: 4px; /* Slight tweak to the corner */
+}
+
+.ai-message {
+    justify-content: flex-start; /* Align AI messages to the left */
+}
+
+.ai-message .message-text {
+    background-color: var(--color-primary); /* Forest Green for AI */
+    color: var(--color-text-light);
+    border-bottom-left-radius: 4px; /* Slight tweak to the corner */
+}
+
+/* Input Area */
+.chat-input {
+    display: flex;
+    padding: var(--spacing-sm);
+    background-color: var(--color-ai-bubble);
+}
+
+.chat-input input[type="text"] {
+    flex-grow: 1;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    background-color: var(--color-dark-bg);
+    color: var(--color-text-light);
+    font-size: 1rem;
+    outline: none;
+    margin-right: var(--spacing-sm);
+    transition: border-color 0.3s ease;
+}
+
+.chat-input input[type="text"]:focus {
+    border-color: var(--color-secondary);
+}
+
+.chat-input button {
+    /* Uses .btn styling from previous design, but adapted for chat */
+    padding: var(--spacing-xs) var(--spacing-md);
+    background-color: var(--color-secondary);
+    color: var(--color-dark-bg);
+    border: none;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.chat-input button:hover {
+    background-color: #C5E379;
 }
 
 /* ======================================================================
-   6. FOOTER
+   4. MEDIA QUERIES (Mobile Adjustments)
    ====================================================================== */
-.footer {
-    background-color: var(--color-primary);
-    color: var(--color-text-muted);
-    text-align: center;
-    padding: var(--spacing-md) 0;
-    border-top: 1px solid var(--color-border);
-    font-size: 0.9rem;
-}
-
-.footer a {
-    color: var(--color-secondary);
-}
-
-/* ======================================================================
-   7. MEDIA QUERIES (Mobile-First Adjustments)
-   ====================================================================== */
-
-/* Adjustments for smaller screens (e.g., typical mobile devices) */
-@media (max-width: 768px) {
+@media (max-width: 800px) {
     :root {
-        --nav-height: 3.5rem;
+        --chat-height: 95vh;
     }
-
-    /* Adjust typography */
-    h1 { font-size: 2rem; }
-    h2 { font-size: 1.5rem; }
-
-    /* Stack navigation links on mobile if too many */
-    .nav-bar {
-        padding: 0 var(--spacing-sm);
+    .chat-container {
+        border-radius: 0; /* Full screen on mobile */
     }
-
-    .nav-links {
-        gap: var(--spacing-sm);
-    }
-}
-
-/* Hide logo/branding on very small screens if necessary */
-@media (max-width: 480px) {
-    .nav-logo {
-        font-size: 1.2rem;
+    body {
+        padding: 0;
     }
 }
