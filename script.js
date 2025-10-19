@@ -1,18 +1,22 @@
-// Ensure you have installed the correct SDK dependency if running locally, 
-// but for a simple GitHub Pages demo, we use a script tag in index.html.
-
 // *******************************************************************
-// 🚨 SECURITY WARNING: REPLACE 'YOUR_API_KEY_HERE' WITH YOUR ACTUAL KEY.
-// DO NOT LEAVE A LIVE KEY HERE AFTER YOUR DEMO IS COMPLETE!
+// 🚨 SECURITY WARNING: The API key below is PUBLICLY VISIBLE on GitHub Pages.
+// REMOVE THIS KEY IMMEDIATELY after your demonstration is complete.
 // *******************************************************************
 import { GoogleGenAI } from '@google/genai';
 
-// Initialize the GoogleGenAI instance with your API Key
-const ai = new GoogleGenAI({apiKey: 'AIzaSyCqTHjq48mqB8tXC9G2qsefsrqnQ2JQjVg'});
-const model = "gemini-2.5-flash"; // A fast and capable model for chat
+// Initialize the GoogleGenAI instance with the provided API Key
+const apiKey = 'AIzaSyCqTHjq48mqB8tXC9G2qsefsrqnQ2JQjVg';
+const ai = new GoogleGenAI({apiKey: apiKey});
+const model = "gemini-2.5-flash"; 
 
-// Initialize chat session history
-const chat = ai.chats.create({ model });
+// Initialize chat session history to maintain context
+const chat = ai.chats.create({ 
+    model: model,
+    // System instruction to give the AI a persona relevant to your project name
+    config: {
+        systemInstruction: "You are the Dermato AI Assistant, a friendly and helpful large language model. Your responses should be concise, professional, and focus on providing useful information while maintaining a supportive tone. You are here to answer questions about the user's web development projects, the design, and any general inquiries."
+    }
+});
 
 // -------------------------------------------------------------------
 // 1. HTML Element References
@@ -22,7 +26,7 @@ const userInput = document.getElementById('user-input');
 const chatMessages = document.getElementById('chat-messages');
 
 // -------------------------------------------------------------------
-// 2. Event Listeners
+// 2. Event Listeners and Initial Setup
 // -------------------------------------------------------------------
 
 // Listen for button click and Enter key press
@@ -33,11 +37,11 @@ userInput.addEventListener('keypress', (e) => {
     }
 });
 
-// Initial Welcome Message from the AI
+// Initial Welcome Message from the AI on page load
 document.addEventListener('DOMContentLoaded', () => {
-    // A small delay to ensure the DOM is fully rendered before inserting the message
+    // Add a small delay to ensure the chat box CSS is fully applied before the first message
     setTimeout(() => {
-        appendMessage('Hello! I am the Dermato AI Assistant, powered by Gemini. Ask me anything!', 'ai');
+        appendMessage('Hello! I am the Dermato AI Assistant, powered by Gemini. I can help answer questions about your project design or general inquiries. What can I do for you?', 'ai');
     }, 100);
 });
 
@@ -63,7 +67,9 @@ function sendMessage() {
 }
 
 async function callAIApi(userMessage) {
-    let aiResponseText = "An error occurred while connecting to the AI.";
+    let aiResponseText = "An error occurred while connecting to the AI. Please check your network connection.";
+    
+    // Display a temporary 'thinking' message
     let loadingElement = appendMessage('AI is thinking...', 'ai');
     
     try {
@@ -75,16 +81,22 @@ async function callAIApi(userMessage) {
 
     } catch (error) {
         console.error("Gemini API Call Failed:", error);
-        aiResponseText = "An error occurred while connecting to the AI. Check the console for details.";
+        // Provide more helpful error message if the API key is the issue
+        if (error.message && error.message.includes('API_KEY_INVALID')) {
+            aiResponseText = "Authentication error: The API key might be invalid or restricted. Check your console for details.";
+        } else {
+             aiResponseText = "An unexpected error occurred. See console for details.";
+        }
+
     }
     
-    // Update the loading message with the final AI response
+    // Update the 'thinking' message with the final AI response
     loadingElement.querySelector('.message-text').textContent = aiResponseText;
 
     // Re-enable input and button
     userInput.disabled = false;
     sendButton.disabled = false;
-    userInput.focus(); // Set focus back to input for quick typing
+    userInput.focus(); 
 
     // Scroll to the bottom to see the newest message
     chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -108,6 +120,6 @@ function appendMessage(text, sender) {
     // Scroll to the bottom
     chatMessages.scrollTop = chatMessages.scrollHeight;
     
-    // Return the element so we can modify the loading state later
+    // Return the element for later modification (e.g., updating 'thinking...')
     return messageDiv;
 }
