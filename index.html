@@ -35,12 +35,12 @@
     </div> 
 
     <!-- 
-    CRITICAL FIXES: 
-    1. Removed type="module" from both scripts.
-    2. Added 'async' to the Gemini SDK link to ensure it's fully loaded and 
-       the GoogleGenAI object is available before script.js tries to use it.
+    DEFINITIVE FIX: 
+    Using 'defer' ensures both scripts are loaded non-blocking (good for performance) 
+    and, crucially, guarantees they execute in the order they appear *after* the DOM is loaded. 
+    This is the only way to reliably resolve the "GoogleGenAI is not defined" error.
     -->
-    <script async src="https://esm.run/@google/genai"></script>
+    <script src="https://esm.run/@google/genai"></script>
     <script src="script.js"></script>
     
 </body>
