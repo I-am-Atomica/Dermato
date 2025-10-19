@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Chat Interface</title>
+    <!-- Links to your custom stylesheet -->
     <link rel="stylesheet" href="dermato.css"> 
 </head>
 <body>
@@ -12,6 +13,7 @@
         
         <h1>Dermato</h1>
 
+        <!-- 1. Scrollable Message History Area -->
         <div class="chat-messages" id="chat-messages">
             
             <div class="message ai-message">
@@ -22,12 +24,23 @@
                 <div class="message-text">I have a question about my project.</div>
             </div>
 
-        </div> <div class="chat-input">
+        </div> 
+        
+        <!-- 2. Input and Send Button Area -->
+        <div class="chat-input">
             <input type="text" id="user-input" placeholder="Ask your question here..." />
             <button id="send-button">Send</button>
         </div>
 
-    </div> <script src="https://esm.run/@google/genai"></script>
+    </div> 
+
+    <!-- 
+    CRITICAL FIXES: 
+    1. Removed type="module" from both scripts.
+    2. Added 'async' to the Gemini SDK link to ensure it's fully loaded and 
+       the GoogleGenAI object is available before script.js tries to use it.
+    -->
+    <script async src="https://esm.run/@google/genai"></script>
     <script src="script.js"></script>
     
 </body>
