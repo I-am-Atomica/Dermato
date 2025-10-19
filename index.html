@@ -6,7 +6,6 @@
     <title>Dermato AI Chat Assistant</title>
     <link rel="stylesheet" href="dermato.css"> 
 
-    <!-- FIX: Added a link tag to use an emoji as the favicon, eliminating the 404 error -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌿</text></svg>">
     
 </head>
@@ -15,18 +14,17 @@
     <div class="chat-container">
         <h1>Dermato</h1>
         <div class="chat-messages" id="chat-messages">
-            <!-- Messages will be injected here by script.js -->
-        </div> 
+            </div> 
         <div class="chat-input">
             <input type="text" id="user-input" placeholder="Ask your question here..." />
             <button id="send-button">Send</button>
         </div>
     </div> 
 
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+    
     <script type="module" src="https://esm.run/@google/genai"></script>
     <script type="module" src="script.js"></script>
     
 </body>
 </html>
-
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌿</text></svg>">
