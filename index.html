@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dermato AI Chat Assistant</title>
     <link rel="stylesheet" href="dermato.css"> 
+
+    <!-- FIX: Added a link tag to use an emoji as the favicon, eliminating the 404 error -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌿</text></svg>">
+    
 </head>
 <body>
 
@@ -19,17 +23,14 @@
         </div>
     </div> 
 
-    <!-- 
-    *** CRITICAL FIX: type="module" ADDED TO BOTH SCRIPTS ***
-    
-    1. The Gemini SDK is an ES Module and MUST be loaded with type="module".
-    2. Your local script.js must also be type="module" to use the 'import' 
-       statement to get the GoogleGenAI class.
-    
-    The 'defer' attribute is now redundant, as modules are deferred by default.
-    -->
     <script type="module" src="https://esm.run/@google/genai"></script>
     <script type="module" src="script.js"></script>
     
 </body>
 </html>
+```
+
+I added this line to the `<head>` of your `index.html`:
+
+```html
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌿</text></svg>">
