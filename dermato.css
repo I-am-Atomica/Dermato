@@ -201,6 +201,49 @@ h1 {
 }
 
 /* ======================================================================
+   4.5 TYPING INDICATOR (New Section for the Animation)
+   ====================================================================== */
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: 1.5rem; /* Ensure bubble doesn't collapse */
+    width: 3rem;
+}
+
+.typing-indicator span {
+    width: 8px;
+    height: 8px;
+    background-color: var(--color-text-dark); /* Dark dot on light AI bubble */
+    border-radius: 50%;
+    margin: 0 2px;
+    opacity: 0.3; /* Start invisible */
+    animation: pulse 1.4s infinite ease-in-out;
+}
+
+/* Delay pulses for a staggered effect */
+.typing-indicator span:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.typing-indicator span:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+/* Define the animation: move up and fade out slightly */
+@keyframes pulse {
+    0%, 80%, 100% {
+        transform: scale(0.6);
+        opacity: 0.3;
+    }
+    40% {
+        transform: scale(1.0);
+        opacity: 1;
+    }
+}
+
+
+/* ======================================================================
    5. INPUT AREA
    ====================================================================== */
 
