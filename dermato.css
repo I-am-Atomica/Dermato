@@ -53,8 +53,8 @@ body {
     background-attachment: fixed;
     
     /* ADDED: Backdrop filter for blur effect */
-    backdrop-filter: blur(10px); /* Adjust the pixel value (e.g., 5px, 15px) for more or less blur */
-    -webkit-backdrop-filter: blur(10px); /* For Safari support */
+    backdrop-filter: blur(30px); /* Adjust the pixel value (e.g., 5px, 15px) for more or less blur */
+    -webkit-backdrop-filter: blur(30px); /* For Safari support */
     
     /* Ensure no horizontal scroll on mobile */
     overflow-x: hidden;
