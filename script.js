@@ -10,19 +10,22 @@ setLogLevel('Debug');
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
 const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-// IMPORTANT FIX: The API_KEY must be defined like this to be correctly substituted
-const API_KEY = "AIzaSyCqTHjq48mqB8tXC9G2qsefsrqnQ2JQjVg"; 
+// IMPORTANT: The API_KEY must be defined like this to be correctly substituted by the environment
+const API_KEY = ""; 
 
 let db;
 let auth;
 let userId = null;
 let isAuthReady = false;
 
-// --- Gemini Configuration ---
+// --- Image State ---
+// Holds the { mimeType, base64Data } object for the currently uploaded image
+let uploadedImage = null; 
+
+// --- Gemini Configuration and System Instruction ---
 const GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025";
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${API_KEY}`;
 
-// The specific System Instruction requested by the user
 const SYSTEM_INSTRUCTION = `You are the Dermato AI Assistant, a friendly, professional, and highly knowledgeable virtual skincare advisor. You must structure all your advice using clear, valid Markdown formatting, including bolding (**), numbered lists (1.), bullet points (*), and markdown headings (##, ###) where appropriate, to maximize readability and clarity. Your goal is to provide educational, and evidence-based advice on skincare routines, ingredient functions, product types, and common dermatological topics. Keep your responses concise as possible. If the user says something out of context play it off as a joke (example: User: "I have 7 legs" -> Reply: "Damn that’s crazy man, IDK apply moisturizer or contact a chainsaw man").`;
 
 
@@ -55,6 +58,7 @@ async function initializeFirebase() {
     }
 }
 
+
 // --- Main App Flow: Start Chat and Listeners ---
 function startMainAppFlow() {
     // 1. Show the main chat interface
@@ -69,12 +73,77 @@ function startMainAppFlow() {
             handleSendMessage();
         }
     });
+    
+    // Setup Image Upload Listeners
+    setupImageUploadListeners(); 
 
     // Send the custom initial message
     addMessage("Sup homie, I am Mato... Dermato, Made by the suffering dwelled with Atomica and the kindle flame of Mansi", false);
 }
 
-// --- Messaging Functions (Placeholder for actual Gemini Logic) ---
+// ------------------------------------------------------------------
+// Image Upload Logic
+// ------------------------------------------------------------------
+
+const imageUploadInput = document.getElementById('image-upload');
+const uploadButton = document.getElementById('upload-button');
+const imagePreviewContainer = document.getElementById('image-preview-container');
+const imagePreview = document.getElementById('image-preview');
+const removeImageButton = document.getElementById('remove-image-button');
+
+function setupImageUploadListeners() {
+    // Trigger hidden file input when upload button is clicked
+    uploadButton.addEventListener('click', () => {
+        imageUploadInput.click();
+    });
+
+    // Handle file selection
+    imageUploadInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            previewImage(file);
+        }
+    });
+
+    // Handle removing the image
+    removeImageButton.addEventListener('click', clearImageUpload);
+}
+
+function clearImageUpload() {
+    uploadedImage = null;
+    imageUploadInput.value = ''; // Clear file input value
+    imagePreview.src = '';
+    imagePreviewContainer.classList.add('hidden');
+}
+
+function previewImage(file) {
+    if (file.size > 5 * 1024 * 1024) { // Limit image size to 5MB
+        // Use a simple console error instead of alert
+        console.error("Image size is too large (max 5MB).");
+        imageUploadInput.value = '';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        // Display the preview
+        imagePreview.src = e.target.result;
+        imagePreviewContainer.classList.remove('hidden');
+        
+        // Store the Base64 data for the API call
+        const base64Data = e.target.result.split(',')[1];
+        uploadedImage = {
+            mimeType: file.type,
+            base64Data: base64Data
+        };
+    };
+    reader.readAsDataURL(file);
+}
+
+// ------------------------------------------------------------------
+// Messaging and API Logic
+// ------------------------------------------------------------------
+
 const chatMessagesDiv = document.getElementById('chat-messages');
 const userInput = document.getElementById('user-input');
 const sendButton = document.getElementById('send-button');
@@ -86,7 +155,6 @@ function addMessage(text, isUser = false) {
     const messageText = document.createElement('div');
     messageText.className = 'message-text';
     // Use marked.js to render Markdown from AI
-    // NOTE: 'marked' must be available globally via CDN link in index.html
     messageText.innerHTML = isUser ? text : marked.parse(text); 
     
     messageDiv.appendChild(messageText);
@@ -109,14 +177,31 @@ function displaySources(sources, messageContainer) {
     messageContainer.appendChild(sourcesDiv);
 }
 
-async function callGeminiApi(userQuery) {
+// MODIFIED: Accepts uploadedImage object and constructs the multimodal payload
+async function callGeminiApi(userQuery, image) {
+    
+    // Construct the parts array for the content payload
+    const contentParts = [];
+
+    // 1. Add image part if an image is provided
+    if (image) {
+        contentParts.push({
+            inlineData: {
+                data: image.base64Data,
+                mimeType: image.mimeType
+            }
+        });
+    }
+
+    // 2. Add text part (always required)
+    contentParts.push({ text: userQuery });
+
+
     const payload = {
-        contents: [{ parts: [{ text: userQuery }] }],
+        contents: [{ parts: contentParts }],
         // Enable Google Search grounding for evidence-based advice
         tools: [{ "google_search": {} }], 
-        systemInstruction: {
-            parts: [{ text: SYSTEM_INSTRUCTION }]
-        },
+        systemInstruction: SYSTEM_INSTRUCTION
     };
 
     let response = null;
@@ -157,10 +242,10 @@ async function callGeminiApi(userQuery) {
                 }
             } else {
                 const errorBody = await response.text();
-                // Check for the specific 403 Permission Denied error and provide a better message
+                // Check for the specific 403 Permission Denied error
                 if (response.status === 403 && errorBody.includes("PERMISSION_DENIED")) {
                     console.error(`Gemini API error (Status: 403): ${errorBody}`);
-                    throw new Error("API call failed due to permission denial (403). Please ensure the API key is correctly configured.");
+                    throw new Error("API call failed due to permission denial (403). Ensure the API key is configured.");
                 }
 
                 console.error(`Gemini API error (Status: ${response.status}): ${errorBody}`);
@@ -169,29 +254,41 @@ async function callGeminiApi(userQuery) {
         } catch (error) {
             retries++;
             if (retries < maxRetries) {
-                const delay = Math.pow(2, retries) * 1000; // Exponential backoff (2s, 4s, 8s)
+                const delay = Math.pow(2, retries) * 1000; // Exponential backoff
                 await new Promise(resolve => setTimeout(resolve, delay));
             } else {
                 console.error("Gemini API call failed after multiple retries:", error);
-                // Provide the user with the generalized error message shown in the screenshot
                 return { text: "Apologies, I'm having trouble connecting to my knowledge base right now. Please try again in a moment.", sources: [] };
             }
         }
     }
 }
 
+// MODIFIED: Handles clearing the image state after successful send
 async function handleSendMessage() {
     const userQuery = userInput.value.trim();
-    if (userQuery === "") return;
+    const imageToSend = uploadedImage; // Grab the current image before clearing
+    
+    if (userQuery === "" && !imageToSend) return; // Don't send empty message without an image
 
-    addMessage(userQuery, true);
+    // Display a message indicating to the user what was sent
+    let userDisplayMessage = userQuery;
+    if (imageToSend) {
+        userDisplayMessage += userQuery === "" ? "Image uploaded for analysis." : " (with image attached)";
+    }
+    addMessage(userDisplayMessage, true);
+    
     userInput.value = '';
     sendButton.disabled = true;
+    uploadButton.disabled = true;
+
+    // IMPORTANT: Clear the image preview and state right away so user sees it gone
+    clearImageUpload();
 
     const typingIndicator = addTypingIndicator();
 
     try {
-        const responseData = await callGeminiApi(userQuery);
+        const responseData = await callGeminiApi(userQuery, imageToSend);
         
         // Remove typing indicator
         typingIndicator.remove();
@@ -211,6 +308,7 @@ async function handleSendMessage() {
         addMessage(`A critical error occurred: ${error.message}. Check the console for details.`, false);
     } finally {
         sendButton.disabled = false;
+        uploadButton.disabled = false;
     }
 }
 
