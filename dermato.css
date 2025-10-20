@@ -15,9 +15,9 @@
     --color-text-light: #F0FBFC; 
     --color-text-dark: #146B64; 
 
-    /* UPDATED: Typography Variables using Google Fonts */
-    --font-heading: 'Cinzel', serif; /* For the main title */
-    --font-body: 'Delius', cursive; /* For regular chat text */
+    /* Typography Variables using Google Fonts (Cinzel for title, Delius for body) */
+    --font-heading: 'Cinzel', serif; 
+    --font-body: 'Delius', cursive; 
 
     /* Spacing & Sizing */
     --spacing-xs: 4px;
@@ -35,7 +35,7 @@
 }
 
 body {
-    /* Uses Delius for the main body font */
+    /* Apply Delius font */
     font-family: var(--font-body);
     line-height: 1.6;
     color: var(--color-text-light);
@@ -57,7 +57,7 @@ body {
 }
 
 h1 {
-    /* Uses Cinzel for the main title */
+    /* Apply Cinzel font */
     font-family: var(--font-heading);
     color: var(--color-accent);
     margin-bottom: var(--spacing-md);
@@ -273,7 +273,8 @@ h1 {
 }
 
 .splash-text {
-    font-size: 3.5rem;
+    /* UPDATED: Increased font-size for a larger pop-up */
+    font-size: 6rem; 
     font-weight: 900;
     color: var(--color-accent);
     letter-spacing: 0.2em;
@@ -327,7 +328,7 @@ h1 {
 #user-input:focus {
     outline: none;
     border-color: var(--color-accent);
-    /* NEW: Enhanced glow effect */
+    /* Enhanced glow effect */
     box-shadow: 
         0 0 10px rgba(0, 0, 0, 0.5), 
         0 0 8px rgba(102, 255, 216, 0.7); 
@@ -352,7 +353,7 @@ h1 {
 /* Send Button Glow (Hover) */
 #send-button:hover:not(:disabled) {
     background-color: #99FFEE;
-    /* NEW: Enhanced glow effect */
+    /* Enhanced glow effect */
     box-shadow: 
         0 4px 15px rgba(102, 255, 216, 0.6), 
         0 0 10px rgba(102, 255, 216, 0.4); 
