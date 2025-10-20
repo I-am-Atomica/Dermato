@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Initial Welcome Message
-        appendMessage('Hello! I am the Dermato AI Assistant, powered by Gemini. How can I assist you with your skincare questions today?', 'ai');
+        appendMessage('Sup Homie, I am Mato.. Dermato. Bestowed upon thee by the virtue of The SUFFERING dwelled within Atomica and with the kindle flame of Mansi ', 'ai');
 
     } catch (e) {
         console.error("Initialization Failed:", e);
