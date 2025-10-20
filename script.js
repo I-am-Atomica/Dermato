@@ -1,142 +1,381 @@
-// *** CRITICAL FIX: Import GoogleGenAI as it's an ES Module ***
-import { GoogleGenAI } from 'https://esm.run/@google/genai';
+/* * Dermato AI Chat Application Stylesheet
+ * Theme: Deep Teal & Mint Accent (Matching #0D564F backdrop)
+ */
 
-// *******************************************************************
-// SECURITY WARNING: The API key below is PUBLICLY VISIBLE on GitHub Pages.
-// REMOVE THIS KEY IMMEDIATELY after your demonstration is complete.
-// *******************************************************************
+/* ======================================================================
+   1. ROOT VARIABLES & GLOBAL RESET (Updated for Teal Theme)
+   ====================================================================== */
+:root {
+    /* Colors - Teal Theme */
+    --color-dark-bg: #0D564F; /* Deep Teal (from user's reference) */
+    --color-card-bg: #146B64; /* Slightly lighter Teal for Chat Container */
+    --color-ai-bubble: #F0FBFC; /* Near-White/Clinical for AI messages */
+    --color-user-bubble: #28746D; /* Medium Teal for User messages */
+    --color-accent: #66FFD8; /* Light Mint/Cyan for buttons and focus (high contrast) */
+    --color-text-light: #F0FBFC; /* Light text (used everywhere) */
+    --color-text-dark: #146B64; /* Dark text (used on light AI bubble) */
 
-const apiKey = 'AIzaSyCqTHjq48mqB8tXC9G2qsefsrqnQ2JQjVg';
-const model = "gemini-2.5-flash"; 
+    /* Typography */
+    --font-body: 'Inter', sans-serif;
 
-// Declare variables globally
-let ai;
-let chat;
-let sendButton;
-let userInput;
-let chatMessages;
-
-// The 'marked' library is now available globally due to the CDN tag in index.html
-
-// -------------------------------------------------------------------
-// 1. Initialization runs ONLY after the HTML structure is complete
-// -------------------------------------------------------------------
-document.addEventListener('DOMContentLoaded', () => {
-    
-    try {
-        // Initialize AI using the imported class
-        ai = new GoogleGenAI({apiKey: apiKey});
-        
-        // Define the AI's persona and instruction set
-        chat = ai.chats.create({ 
-            model: model,
-            config: {
-                // Ensure the AI uses Markdown, which 'marked' will render correctly
-                systemInstruction: "You are the Dermato AI Assistant, professional, and highly knowledgeable virtual skincare advisor. **You must structure all your advice using clear, valid Markdown formatting**, including bolding (**), numbered lists (1.), bullet points (*), and markdown headings (##, ###) where appropriate, to maximize readability and clarity. [Your goal is to provide educational, and evidence-based advice on skincare routines, ingredient functions, product types, and common dermatological topics] {Keep your responses as concise as possible},{if the user is to input something really out of context you must play it off with as a joke, [Example: I have 3 legs] say something like [man idk apply moisturiser]"
-            }
-        });
-
-        // 2. HTML Element References
-        sendButton = document.getElementById('send-button');
-        userInput = document.getElementById('user-input');
-        chatMessages = document.getElementById('chat-messages');
-
-        // 3. Event Listeners
-        sendButton.addEventListener('click', sendMessage);
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-
-        // Initial Welcome Message
-        appendMessage('Sup Homie, I am Mato.. Dermato. Bestowed upon thee by the virtue of The SUFFERING dwelled within Atomica and with the kindle flame of Mansi ', 'ai');
-
-    } catch (e) {
-        console.error("Initialization Failed:", e);
-        document.getElementById('chat-messages').innerHTML = 
-            '<div class="message ai-message"><div class="message-text">FATAL ERROR: AI failed to initialize. Check console for details.</div></div>';
-    }
-});
-
-
-// -------------------------------------------------------------------
-// 4. Core Logic: Sending Message and Calling API
-// -------------------------------------------------------------------
-
-function sendMessage() {
-    const userMessage = userInput.value.trim(); 
-    if (userMessage === '') return;
-
-    appendMessage(userMessage, 'user');
-    
-    userInput.value = '';
-    userInput.disabled = true;
-    sendButton.disabled = true;
-
-    callAIApi(userMessage);
+    /* Spacing & Sizing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --radius: 12px;
 }
 
-async function callAIApi(userMessage) {
-    let aiResponseText = "An error occurred while connecting to the AI. Please check your network connection.";
-    
-    // Add a temporary "loading" message
-    let loadingElement = appendMessage('AI is thinking...', 'ai');
-    
-    try {
-        const response = await chat.sendMessage({ message: userMessage });
-        aiResponseText = response.text; 
-
-    } catch (error) {
-        console.error("Gemini API Call Failed:", error);
-        
-        if (error.message && error.message.includes('API_KEY_INVALID')) {
-            aiResponseText = "Authentication error: The API key might be invalid or restricted. Check your console for details.";
-        } else {
-             aiResponseText = "An unexpected error occurred. See console for details.";
-        }
-    }
-    
-    // Replace the "loading" message with the actual response using HTML rendering
-    // *** CRITICAL CHANGE: Using marked.parse() for full Markdown support ***
-    loadingElement.querySelector('.message-text').innerHTML = marked.parse(aiResponseText);
-
-    // Re-enable input
-    userInput.disabled = false;
-    sendButton.disabled = false;
-    userInput.focus(); 
-
-    // Scroll to the bottom to view the new message
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+/* Global Reset & Base Styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-// -------------------------------------------------------------------
-// 5. Helper Functions: Message Appending (simplified by using 'marked')
-// -------------------------------------------------------------------
-
-// *** THE OLD 'markdownToHtml' FUNCTION HAS BEEN REMOVED ***
-// The new logic relies entirely on the global marked.parse() function.
-
-function appendMessage(text, sender) {
-    const messageDiv = document.createElement('div');
-    messageDiv.classList.add('message', `${sender}-message`);
-
-    const textDiv = document.createElement('div');
-    textDiv.classList.add('message-text');
+body {
+    font-family: var(--font-body);
+    line-height: 1.6;
+    color: var(--color-text-light);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--spacing-md);
     
-    // Use marked.parse() to convert the Markdown text to fully formatted HTML
-    if (typeof marked !== 'undefined') {
-        textDiv.innerHTML = marked.parse(text);
-    } else {
-        // Fallback if the marked library didn't load
-        textDiv.textContent = text;
+    /* Background Image */
+    background-image: url('https://wallpapercave.com/wp/VmZHnTO.jpg'); 
+    background-color: var(--color-dark-bg); /* Fallback/Base color */
+    background-size: cover; 
+    background-position: center; 
+    background-attachment: fixed;
+    
+    /* Ensure no horizontal scroll on mobile */
+    overflow-x: hidden;
+}
+
+h1 {
+    color: var(--color-accent);
+    margin-bottom: var(--spacing-md);
+    font-size: 2rem;
+    text-align: center;
+    text-shadow: 0 0 5px rgba(102, 255, 216, 0.5); /* Subtle glow effect */
+}
+
+/* ======================================================================
+   2. CHAT CONTAINER & LAYOUT
+   ====================================================================== */
+
+.chat-container {
+    width: 90%;
+    max-width: 700px;
+    height: 90vh;
+    max-height: 900px;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-card-bg);
+    border-radius: var(--radius);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    padding: var(--spacing-lg);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    
+    /* NEW: Firefox Scrollbar Style */
+    scrollbar-color: var(--color-accent) var(--color-card-bg);
+    scrollbar-width: thin;
+}
+
+/* Webkit Scrollbar Styling (Chrome, Safari, Edge) */
+.chat-messages::-webkit-scrollbar {
+    width: 8px;
+}
+.chat-messages::-webkit-scrollbar-thumb {
+    /* Uses the bright mint accent color */
+    background-color: var(--color-accent); 
+    border-radius: 10px;
+    border: 2px solid var(--color-card-bg); /* Adds padding/separation */
+}
+.chat-messages::-webkit-scrollbar-track {
+    background: var(--color-card-bg); /* Dark teal track */
+}
+
+
+/* ======================================================================
+   3. MESSAGE BUBBLES
+   ====================================================================== */
+
+.message {
+    display: flex;
+    margin-bottom: var(--spacing-sm);
+}
+
+.message-text {
+    max-width: 90%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius);
+    line-height: 1.5;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* User Message (Right Alignment, Darker Teal) */
+.user-message {
+    justify-content: flex-end;
+}
+
+.user-message .message-text {
+    background-color: var(--color-user-bubble);
+    color: var(--color-text-light);
+    border-bottom-right-radius: var(--spacing-xs); /* Tail for user */
+}
+
+/* AI Message (Left Alignment, Light/Clinical) */
+.ai-message {
+    justify-content: flex-start;
+}
+
+.ai-message .message-text {
+    background-color: var(--color-ai-bubble);
+    color: var(--color-text-dark); /* Dark text on light background */
+    border-bottom-left-radius: var(--spacing-xs); /* Tail for AI */
+}
+
+/* ======================================================================
+   4. MARKDOWN STYLING INSIDE MESSAGES 
+   ====================================================================== */
+
+/* Lists */
+.ai-message .message-text ul,
+.ai-message .message-text ol,
+.user-message .message-text ul,
+.user-message .message-text ol {
+    padding-left: 1.5rem;
+    margin: var(--spacing-sm) 0;
+}
+
+.ai-message .message-text li,
+.user-message .message-text li {
+    margin-bottom: var(--spacing-xs);
+}
+
+/* Headings */
+.ai-message .message-text h2, 
+.ai-message .message-text h3,
+.user-message .message-text h2, 
+.user-message .message-text h3 {
+    margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    font-weight: 700;
+    line-height: 1.3;
+}
+.ai-message .message-text h2 {
+    font-size: 1.3rem;
+    color: var(--color-text-dark); 
+}
+.ai-message .message-text h3 {
+    font-size: 1.1rem;
+    color: var(--color-text-dark);
+}
+.user-message .message-text h2, .user-message .message-text h3 {
+    color: var(--color-text-light);
+}
+
+
+/* Paragraphs */
+.message-text p {
+    margin-top: 0;
+    margin-bottom: var(--spacing-sm);
+}
+
+/* Code Blocks (if generated) */
+.message-text pre {
+    background-color: rgba(0, 0, 0, 0.1); 
+    padding: var(--spacing-sm);
+    border-radius: var(--radius);
+    overflow-x: auto;
+}
+
+/* ======================================================================
+   4.5 TYPING INDICATOR 
+   ====================================================================== */
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: 1.5rem; /* Ensure bubble doesn't collapse */
+    width: 3rem;
+}
+
+.typing-indicator span {
+    width: 8px;
+    height: 8px;
+    background-color: var(--color-text-dark); /* Dark dot on light AI bubble */
+    border-radius: 50%;
+    margin: 0 2px;
+    opacity: 0.3; /* Start invisible */
+    animation: pulse 1.4s infinite ease-in-out;
+}
+
+/* Delay pulses for a staggered effect */
+.typing-indicator span:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.typing-indicator span:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+/* Define the animation: move up and fade out slightly */
+@keyframes pulse {
+    0%, 80%, 100% {
+        transform: scale(0.6);
+        opacity: 0.3;
+    }
+    40% {
+        transform: scale(1.0);
+        opacity: 1;
+    }
+}
+
+
+/* ======================================================================
+   4.7 SPLASH SCREEN ANIMATION (NEW)
+   ====================================================================== */
+#splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-dark-bg); /* Use the deep teal background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure it is on top of everything */
+    opacity: 1;
+    pointer-events: all; /* Allows it to block interaction initially */
+    transition: opacity 0.5s ease-out, visibility 0.5s;
+}
+
+#splash-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.splash-text {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--color-accent);
+    letter-spacing: 0.2em;
+    opacity: 0;
+    animation: pop-in-and-out 3s ease-in-out forwards;
+    text-shadow: 0 0 20px rgba(102, 255, 216, 0.9);
+    transform: scale(0.5); /* Start small */
+}
+
+@keyframes pop-in-and-out {
+    /* Stage 1: Pop In (0% to 20%) */
+    0% { transform: scale(0.5); opacity: 0; }
+    20% { transform: scale(1.1); opacity: 1; }
+    30% { transform: scale(1); opacity: 1; }
+    
+    /* Stage 2: Hold (30% to 70%) */
+    70% { transform: scale(1); opacity: 1; }
+
+    /* Stage 3: Pop Down/Fade Out (70% to 100%) */
+    100% { transform: scale(0.5); opacity: 0; }
+}
+
+
+/* ======================================================================
+   5. INPUT AREA
+   ====================================================================== */
+
+.chat-input {
+    display: flex;
+    gap: var(--spacing-sm);
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+#user-input {
+    flex-grow: 1;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--color-card-bg);
+    border-radius: var(--radius);
+    background-color: #0d564f; /* Matches dark base for seamless look */
+    color: var(--color-text-light);
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s;
+}
+
+/* Input Field Glow (Focus) */
+#user-input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    /* NEW: Enhanced glow effect */
+    box-shadow: 
+        0 0 10px rgba(0, 0, 0, 0.5), 
+        0 0 8px rgba(102, 255, 216, 0.7); 
+}
+
+/* Button */
+#send-button {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--color-accent);
+    color: var(--color-dark-bg);
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+    flex-shrink: 0;
+}
+
+/* Send Button Glow (Hover) */
+#send-button:hover:not(:disabled) {
+    background-color: #99FFEE;
+    /* NEW: Enhanced glow effect */
+    box-shadow: 
+        0 4px 15px rgba(102, 255, 216, 0.6), 
+        0 0 10px rgba(102, 255, 216, 0.4); 
+}
+
+#send-button:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+#send-button:disabled {
+    background-color: #387D75; 
+    cursor: not-allowed;
+}
+
+/* ======================================================================
+   6. RESPONSIVENESS (Mobile Adjustments)
+   ====================================================================== */
+
+@media (max-width: 600px) {
+    .chat-container {
+        width: 100%;
+        height: 100vh;
+        max-height: initial;
+        padding: var(--spacing-md);
+        border-radius: 0;
+    }
+    
+    body {
+        padding: 0;
     }
 
-    messageDiv.appendChild(textDiv);
-    chatMessages.appendChild(messageDiv);
-    
-    // Scroll to the bottom
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-    
-    return messageDiv;
+    /* Adjust bubble max-width slightly for smaller screens */
+    .message-text {
+        max-width: 95%;
+    }
 }
