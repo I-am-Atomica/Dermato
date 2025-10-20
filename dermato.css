@@ -145,6 +145,8 @@ h1 {
     background-color: var(--color-user-bubble);
     color: var(--color-text-light);
     border-bottom-right-radius: var(--spacing-xs); /* Tail for user */
+    margin-left: auto; /* Pushes bubble to the right */
+    margin-right: 0;
 }
 
 /* AI Message (Left Alignment, Light/Clinical) */
@@ -156,6 +158,8 @@ h1 {
     background-color: var(--color-ai-bubble);
     color: var(--color-text-dark); /* Dark text on light background */
     border-bottom-left-radius: var(--spacing-xs); /* Tail for AI */
+    margin-left: 0;
+    margin-right: auto; /* Pushes bubble to the left */
 }
 
 /* ======================================================================
