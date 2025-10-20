@@ -68,6 +68,7 @@ h1 {
 
 /* Helper Class to universally hide elements */
 .hidden {
+    /* Important: Use display: none and opacity: 0 together for reliable hiding */
     display: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
