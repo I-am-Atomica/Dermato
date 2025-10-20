@@ -71,7 +71,7 @@ function startMainAppFlow() {
     });
 
     // Send the custom initial message
-    addMessage("Sup homie, I am Mato... Dermato, Made by the suffering dwelled with Atomica and the kindle flame of Mansi", false);
+    addMessage("Sup homie, I am Mato... Dermato, Made of the suffering dwelled within Atomica and the kindle flame of Mansi", false);
 }
 
 // --- Messaging Functions (Placeholder for actual Gemini Logic) ---
