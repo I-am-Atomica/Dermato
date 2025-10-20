@@ -8,12 +8,12 @@
 :root {
     /* Colors - Teal Theme */
     --color-dark-bg: #0D564F; /* Deep Teal (from user's reference) */
-    --color-card-bg: #B2ECF3; /* Slightly lighter Teal for Chat Container */
+    --color-card-bg: #146B64; /* Slightly lighter Teal for Chat Container */
     --color-ai-bubble: #F0FBFC; /* Near-White/Clinical for AI messages */
     --color-user-bubble: #28746D; /* Medium Teal for User messages */
     --color-accent: #66FFD8; /* Light Mint/Cyan for buttons and focus (high contrast) */
-    --color-text-light: #F0FBFC; /* Light text (used everywhere) */
-    --color-text-dark: #B2ECF3; /* Dark text (used on light AI bubble) */
+    --color-text-light: #B2ECF3; /* Light text (used everywhere) */
+    --color-text-dark: #146B64; /* Dark text (used on light AI bubble) */
 
     /* Typography */
     --font-body: 'Inter', sans-serif;
