@@ -2,7 +2,7 @@
  * Dermato AI Chat Assistant Stylesheet
  *
  * Defines the visual appearance for the chat interface,
- * splash screens, messages, and the new image upload feature.
+ * splash screens, messages, and overall theme.
  */
 
 /* ======================================================================
@@ -258,7 +258,7 @@ h1 {
 
 
 /* ======================================================================
-   5. INPUT AREA (Updated for Multimodal)
+   5. INPUT AREA
    ====================================================================== */
 
 .chat-input {
@@ -285,8 +285,8 @@ h1 {
     box-shadow: 0 0 5px rgba(102, 255, 216, 0.5);
 }
 
-#send-button, #upload-button {
-    padding: var(--spacing-sm);
+#send-button {
+    padding: var(--spacing-sm) var(--spacing-md);
     background-color: var(--color-accent);
     color: var(--color-dark-bg);
     border: none;
@@ -298,66 +298,15 @@ h1 {
     flex-shrink: 0;
 }
 
-/* Style identical to send button but uses a camera emoji/icon */
-#upload-button {
-    font-size: 1.2rem; 
-    width: 45px; /* Fixed width for square button */
-}
-
-#send-button:hover:not(:disabled),
-#upload-button:hover:not(:disabled) {
+#send-button:hover:not(:disabled) {
     background-color: #99FFEE;
     box-shadow: 
         0 4px 15px rgba(102, 255, 216, 0.6), 
         0 0 10px rgba(102, 255, 216, 0.4); 
 }
 
-#send-button:disabled,
-#upload-button:disabled {
+#send-button:disabled {
     background-color: var(--color-text-secondary);
     cursor: not-allowed;
     box-shadow: none;
-}
-
-/* ======================================================================
-   6. IMAGE PREVIEW (NEW)
-   ====================================================================== */
-
-#image-preview-container {
-    position: relative;
-    padding: var(--spacing-sm);
-    margin-bottom: var(--spacing-sm);
-    border: 1px dashed var(--color-accent);
-    border-radius: var(--radius);
-    background-color: rgba(20, 107, 100, 0.5); /* Semi-transparent card background */
-}
-
-#image-preview {
-    max-width: 100px;
-    max-height: 100px;
-    display: block;
-    border-radius: var(--radius);
-    object-fit: cover;
-}
-
-#remove-image-button {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background-color: #f00;
-    color: white;
-    border: 1px solid white;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    line-height: 1;
-    font-size: 12px;
-    cursor: pointer;
-    text-align: center;
-    padding: 0;
-    transition: background-color 0.2s;
-}
-
-#remove-image-button:hover {
-    background-color: #c00;
 }
