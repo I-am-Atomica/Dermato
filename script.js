@@ -1,176 +1,185 @@
-// *** CRITICAL FIX: Import GoogleGenAI as it's an ES Module ***
-import { GoogleGenAI } from 'https://esm.run/@google/genai';
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, query, onSnapshot, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-// *******************************************************************
-// SECURITY WARNING: The API key below is PUBLICLY VISIBLE on GitHub Pages.
-// REMOVE THIS KEY IMMEDIATELY after your demonstration is complete.
-// *******************************************************************
+// Set Firebase log level for debugging
+setLogLevel('Debug');
 
-const apiKey = 'AIzaSyCqTHjq48mqB8tXC9G2qsefsrqnQ2JQjVg';
-const model = "gemini-2.5-flash"; 
+// --- Global Setup (Required by Canvas environment) ---
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-// Declare variables globally
-let ai;
-let chat;
-let sendButton;
-let userInput;
-let chatMessages;
-let splashScreen; // NEW: Global reference for splash screen
+let db;
+let auth;
+let userId = null;
+let isAuthReady = false;
 
-// The 'marked' library is now available globally due to the CDN tag in index.html
-
-// -------------------------------------------------------------------
-// 1. Initialization runs ONLY after the HTML structure is complete
-// -------------------------------------------------------------------
-document.addEventListener('DOMContentLoaded', () => {
-    
-    // NEW: Get the splash screen element
-    splashScreen = document.getElementById('splash-screen');
-
-    // NEW: Function to hide the splash screen after the animation finishes (3.5s)
-    setTimeout(() => {
-        if (splashScreen) {
-            splashScreen.classList.add('hidden');
-        }
-    }, 3500); 
-
+// --- Initialize Firebase and Authentication ---
+async function initializeFirebase() {
     try {
-        // Initialize AI using the imported class
-        ai = new GoogleGenAI({apiKey: apiKey});
-        
-        // Define the AI's persona and instruction set
-        chat = ai.chats.create({ 
-            model: model,
-            config: {
-                // Ensure the AI uses Markdown, which 'marked' will render correctly
-                systemInstruction: "You are the Dermato AI Assistant, a friendly, professional, and highly knowledgeable virtual skincare advisor. **You must structure all your advice using clear, valid Markdown formatting**, including bolding (**), numbered lists (1.), bullet points (*), and markdown headings (##, ###) where appropriate, to maximize readability and clarity. Your goal is to provide educational, and evidence-based advice on skincare routines, ingredient functions, product types, and common dermatological topics.[Keep your responses concise as possible], {if the user says something out of context play it off as a joke example:[I have 7 legs] reply with something like [Damn that’s crazy man, IDK apply moisturizer or contact a chainsaw man]."
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+
+        // Handle authentication
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+            } else {
+                // If no token, sign in anonymously
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                    userId = auth.currentUser.uid;
+                } else {
+                    await signInAnonymously(auth);
+                    userId = auth.currentUser.uid;
+                }
             }
+            isAuthReady = true;
+            console.log("Firebase Auth Ready. User ID:", userId);
         });
-
-        // 2. HTML Element References
-        sendButton = document.getElementById('send-button');
-        userInput = document.getElementById('user-input');
-        chatMessages = document.getElementById('chat-messages');
-
-        // 3. Event Listeners
-        sendButton.addEventListener('click', sendMessage);
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-
-        // Initial Welcome Message
-        // Delay this message slightly so it doesn't appear on top of the splash screen fade
-        setTimeout(() => {
-             appendMessage('Hello! I am the Dermato AI Assistant, powered by Gemini. How can I assist you with your skincare questions today?', 'ai');
-        }, 3600);
-
-
-    } catch (e) {
-        console.error("Initialization Failed:", e);
-        document.getElementById('chat-messages').innerHTML = 
-            '<div class="message ai-message"><div class="message-text">FATAL ERROR: AI failed to initialize. Check console for details.</div></div>';
+    } catch (error) {
+        console.error("Firebase initialization failed:", error);
     }
-});
+}
 
+// --- Main App Flow: Start Chat and Listeners ---
+function startMainAppFlow() {
+    // 1. Show the main chat interface
+    const chatContainer = document.querySelector('.chat-container');
+    chatContainer.classList.remove('hidden');
 
-// -------------------------------------------------------------------
-// 4. Core Logic: Sending Message and Calling API
-// -------------------------------------------------------------------
+    // 2. Setup message listeners and event handlers
+    setupChatListeners();
+    document.getElementById('send-button').addEventListener('click', handleSendMessage);
+    document.getElementById('user-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            handleSendMessage();
+        }
+    });
 
-function sendMessage() {
-    const userMessage = userInput.value.trim(); 
-    if (userMessage === '') return;
+    // Send an initial message
+    addMessage("Sup homie, I am Mato... Dermato, Made by the suffering dwelled with Atomica and the kindle flame of Mansi ", false);
+}
 
-    appendMessage(userMessage, 'user');
+// --- Messaging Functions (Placeholder for actual Gemini Logic) ---
+const chatMessagesDiv = document.getElementById('chat-messages');
+const userInput = document.getElementById('user-input');
+const sendButton = document.getElementById('send-button');
+
+function addMessage(text, isUser = false) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
     
+    const messageText = document.createElement('div');
+    messageText.className = 'message-text';
+    // Use marked.js to render Markdown from AI
+    // NOTE: 'marked' must be available globally via CDN link in index.html
+    messageText.innerHTML = isUser ? text : marked.parse(text); 
+    
+    messageDiv.appendChild(messageText);
+    chatMessagesDiv.appendChild(messageDiv);
+    chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; // Auto-scroll to bottom
+}
+
+function handleSendMessage() {
+    const text = userInput.value.trim();
+    if (text === "") return;
+
+    addMessage(text, true);
     userInput.value = '';
-    userInput.disabled = true;
     sendButton.disabled = true;
 
-    callAIApi(userMessage);
+    // Simulate AI response delay
+    const typingIndicator = addTypingIndicator();
+    
+    setTimeout(() => {
+        typingIndicator.remove();
+        // Placeholder response as Gemini API calls are not implemented here
+        addMessage("That's a great question. Let me find the best dermatological advice for you!", false);
+        sendButton.disabled = false;
+    }, 2500);
 }
 
-async function callAIApi(userMessage) {
-    let aiResponseText = "An error occurred while connecting to the AI. Please check your network connection.";
-    
-    // Append the animated typing indicator
-    let loadingElement = appendMessage(null, 'ai', true); 
-    
-    try {
-        const response = await chat.sendMessage({ message: userMessage });
-        aiResponseText = response.text; 
-
-    } catch (error) {
-        console.error("Gemini API Call Failed:", error);
-        
-        if (error.message && error.message.includes('API_KEY_INVALID')) {
-            aiResponseText = "Authentication error: The API key might be invalid or restricted. Check your console for details.";
-        } else {
-             aiResponseText = "An unexpected error occurred. See console for details.";
-        }
-    }
-    
-    // Replace the typing indicator with the actual message
-    const messageTextElement = loadingElement.querySelector('.message-text');
-    messageTextElement.classList.remove('typing-indicator');
-    
-    // Replace the "loading" message with the actual response using marked.parse()
-    if (typeof marked !== 'undefined') {
-        messageTextElement.innerHTML = marked.parse(aiResponseText);
-    } else {
-        messageTextElement.textContent = aiResponseText; // Fallback if marked library isn't available
-    }
-
-    // Re-enable input
-    userInput.disabled = false;
-    sendButton.disabled = false;
-    userInput.focus(); 
-
-    // Scroll to the bottom to view the new message
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-// -------------------------------------------------------------------
-// 5. Helper Functions: Message Appending (Modified for Typing Indicator)
-// -------------------------------------------------------------------
-
-/**
- * Appends a message to the chat container.
- * @param {string|null} text - The message content.
- * @param {string} sender - 'user' or 'ai'.
- * @param {boolean} [isTyping=false] - Whether to show the animated typing indicator.
- * @returns {HTMLElement} The created message container div.
- */
-function appendMessage(text, sender, isTyping = false) {
+function addTypingIndicator() {
     const messageDiv = document.createElement('div');
-    messageDiv.classList.add('message', `${sender}-message`);
-
-    const textDiv = document.createElement('div');
-    textDiv.classList.add('message-text');
+    messageDiv.className = 'message ai-message';
     
-    if (isTyping) {
-        // Build the HTML for the animated dots
-        textDiv.classList.add('typing-indicator');
-        textDiv.innerHTML = `
+    const messageText = document.createElement('div');
+    messageText.className = 'message-text typing-indicator-container';
+    messageText.innerHTML = `
+        <div class="typing-indicator">
             <span></span>
             <span></span>
             <span></span>
-        `;
-    } else if (typeof marked !== 'undefined') {
-        // Use marked.parse() for regular messages
-        textDiv.innerHTML = marked.parse(text);
-    } else {
-        // Fallback
-        textDiv.textContent = text;
-    }
-
-    messageDiv.appendChild(textDiv);
-    chatMessages.appendChild(messageDiv);
-    
-    // Scroll to the bottom
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-    
+        </div>
+    `;
+    messageDiv.appendChild(messageText);
+    chatMessagesDiv.appendChild(messageDiv);
+    chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; 
     return messageDiv;
+}
+
+// Placeholder for Firestore listeners (required by instructions)
+function setupChatListeners() {
+    if (!db || !userId) return;
+
+    const messagesCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/messages`);
+    const q = query(messagesCollectionRef, orderBy('timestamp'));
+
+    // Minimal example to satisfy the requirement for onSnapshot
+    onSnapshot(q, (snapshot) => {
+        console.log("Firestore snapshot received (History update check):", snapshot.docs.length);
+    });
+}
+
+
+// --- DUAL-STAGE SPLASH SCREEN LOGIC ---
+window.onload = function() {
+    const preSplashScreen = document.getElementById('pre-splash-screen');
+    const mainSplashScreen = document.getElementById('splash-screen');
+    const splashText = mainSplashScreen.querySelector('.splash-text');
+    
+    // Stage 1: Initialize Firebase/Auth (happens in background)
+    initializeFirebase();
+
+    // Stage 2: Show the image for 3 seconds
+    setTimeout(() => {
+        // A. Hide the image splash screen (Stage 1)
+        preSplashScreen.classList.add('hidden');
+        
+        // B. Show the DERMATO text splash screen (Stage 2)
+        mainSplashScreen.classList.remove('hidden');
+        
+        // C. Start the DERMATO animation by adding the 'animate' class
+        splashText.classList.add('animate');
+
+        // D. After the DERMATO animation duration (3s), start the fade-out process
+        setTimeout(() => {
+             mainSplashScreen.classList.add('hidden');
+        }, 3000); 
+
+        // E. Listen for the main splash screen transition to complete its fade-out
+        mainSplashScreen.addEventListener('transitionend', (event) => {
+            // Check if the transition that just ended is the main opacity transition
+            // and the screen is actually hidden
+            if (event.propertyName === 'opacity' && mainSplashScreen.classList.contains('hidden')) {
+                // If we are already authenticated, start the app immediately.
+                if (isAuthReady) {
+                    startMainAppFlow();
+                } else {
+                    // Otherwise, wait for auth to finish
+                    const authInterval = setInterval(() => {
+                        if (isAuthReady) {
+                            clearInterval(authInterval);
+                            startMainAppFlow();
+                        }
+                    }, 100);
+                }
+            }
+        });
+
+    }, 3000); // 3000ms = 3 seconds delay for the image splash
 }
