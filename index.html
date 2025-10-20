@@ -3,22 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dermato</title>
-    <!-- Load custom stylesheet -->
+    <title>Dermato AI Assistant</title>
+    <!-- Load custom CSS -->
     <link rel="stylesheet" href="dermato.css">
-    <!-- Load Inter font from Google Fonts -->
+    <!-- Load Inter font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- Load marked.js for Markdown rendering in chat messages -->
-    <script src="https://cdn.jsdelivr.net/npm/marked@4.2.12/marked.min.js"></script>
+    <!-- Load Marked.js for rendering Markdown in chat messages -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.10/marked.min.js"></script>
 </head>
 <body>
 
-    <!-- Stage 1: Pre-Splash Screen (Image) -->
+    <!-- Stage 1 Splash Screen (Image/Icon) -->
     <div id="pre-splash-screen" class="splash-screen">
-        <img src="image.png" alt="Dermato AI Logo Placeholder" class="pre-splash-image">
+        <!-- Placeholder image/icon for initial splash. Using a simple placeholder for speed. -->
+        <img src="image.png" alt="Dermato AI Icon" class="pre-splash-image">
     </div>
 
-    <!-- Stage 2: Main Splash Screen (Animated Text) -->
+    <!-- Stage 2 Splash Screen (Text Animation) -->
     <div id="splash-screen" class="splash-screen hidden">
         <div class="splash-text-container">
             <span class="splash-text">D</span>
@@ -33,28 +34,17 @@
 
     <!-- Main Chat Interface (starts hidden, shown after all splash screens finish) -->
     <div class="chat-container hidden">
-        <h1>Dermato</h1>
+        <h1>Dermato AI Assistant</h1>
         
         <div id="chat-messages" class="chat-messages">
             <!-- Messages will be appended here by script.js -->
         </div>
         
-        <!-- NEW: Image Preview Container (appears above input) -->
-        <div id="image-preview-container" class="hidden">
-            <img id="image-preview" src="" alt="Skin image preview" />
-            <button id="remove-image-button">X</button>
-        </div>
-
         <div class="chat-input">
-            <!-- NEW: Hidden file input for image selection -->
-            <input type="file" id="image-upload" accept="image/*" class="hidden">
-            
-            <!-- NEW: Button to trigger the file input -->
-            <button id="upload-button" title="Upload a photo of your skin">📷</button>
-
-            <input type="text" id="user-input" placeholder="Ask a question about your skincare routine or photo..." autocomplete="off">
+            <input type="text" id="user-input" placeholder="Ask a question about your skincare routine..." autocomplete="off">
             <button id="send-button">Send</button>
         </div>
+
     </div>
 
     <!-- Link to the main JavaScript file (type="module" is critical for Firebase/Gemini SDK import) -->
