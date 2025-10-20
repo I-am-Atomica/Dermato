@@ -1,7 +1,7 @@
-// --- Firebase and Library Imports ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, collection, query, orderBy, onSnapshot, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, onSnapshot, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 // Set Firebase log level for debugging
 setLogLevel('Debug');
@@ -10,25 +10,19 @@ setLogLevel('Debug');
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
 const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-// The API_KEY must be defined as an empty string here; the runtime will substitute the actual key.
-const API_KEY = ""; 
+// IMPORTANT FIX: The API_KEY must be defined like this to be correctly substituted
+const API_KEY = "AIzaSyCqTHjq48mqB8tXC9G2qsefsrqnQ2JQjVg"; 
 
 let db;
 let auth;
 let userId = null;
 let isAuthReady = false;
 
-// --- DOM Elements ---
-const chatMessagesDiv = document.getElementById('chat-messages');
-const userInput = document.getElementById('user-input');
-const sendButton = document.getElementById('send-button');
-
-// --- Gemini Configuration and System Instruction ---
+// --- Gemini Configuration ---
 const GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025";
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${API_KEY}`;
 
-// This instruction defines the AI's persona, formatting rules, and behavior.
+// The specific System Instruction requested by the user
 const SYSTEM_INSTRUCTION = `You are the Dermato AI Assistant, a friendly, professional, and highly knowledgeable virtual skincare advisor. You must structure all your advice using clear, valid Markdown formatting, including bolding (**), numbered lists (1.), bullet points (*), and markdown headings (##, ###) where appropriate, to maximize readability and clarity. Your goal is to provide educational, and evidence-based advice on skincare routines, ingredient functions, product types, and common dermatological topics. Keep your responses concise as possible. If the user says something out of context play it off as a joke (example: User: "I have 7 legs" -> Reply: "Damn that’s crazy man, IDK apply moisturizer or contact a chainsaw man").`;
 
 
@@ -61,7 +55,6 @@ async function initializeFirebase() {
     }
 }
 
-
 // --- Main App Flow: Start Chat and Listeners ---
 function startMainAppFlow() {
     // 1. Show the main chat interface
@@ -76,14 +69,15 @@ function startMainAppFlow() {
             handleSendMessage();
         }
     });
-    
+
     // Send the custom initial message
     addMessage("Sup homie, I am Mato... Dermato, Made by the suffering dwelled with Atomica and the kindle flame of Mansi", false);
 }
 
-// ------------------------------------------------------------------
-// Gemini API and Chat Message Logic
-// ------------------------------------------------------------------
+// --- Messaging Functions (Placeholder for actual Gemini Logic) ---
+const chatMessagesDiv = document.getElementById('chat-messages');
+const userInput = document.getElementById('user-input');
+const sendButton = document.getElementById('send-button');
 
 function addMessage(text, isUser = false) {
     const messageDiv = document.createElement('div');
@@ -92,6 +86,7 @@ function addMessage(text, isUser = false) {
     const messageText = document.createElement('div');
     messageText.className = 'message-text';
     // Use marked.js to render Markdown from AI
+    // NOTE: 'marked' must be available globally via CDN link in index.html
     messageText.innerHTML = isUser ? text : marked.parse(text); 
     
     messageDiv.appendChild(messageText);
@@ -115,16 +110,13 @@ function displaySources(sources, messageContainer) {
 }
 
 async function callGeminiApi(userQuery) {
-    
-    const contentParts = [{ text: userQuery }];
-
     const payload = {
-        contents: [{ parts: contentParts }],
+        contents: [{ parts: [{ text: userQuery }] }],
         // Enable Google Search grounding for evidence-based advice
         tools: [{ "google_search": {} }], 
-        config: {
-            systemInstruction: SYSTEM_INSTRUCTION
-        }
+        systemInstruction: {
+            parts: [{ text: SYSTEM_INSTRUCTION }]
+        },
     };
 
     let response = null;
@@ -165,10 +157,10 @@ async function callGeminiApi(userQuery) {
                 }
             } else {
                 const errorBody = await response.text();
-                // Check for the specific 403 Permission Denied error
+                // Check for the specific 403 Permission Denied error and provide a better message
                 if (response.status === 403 && errorBody.includes("PERMISSION_DENIED")) {
                     console.error(`Gemini API error (Status: 403): ${errorBody}`);
-                    throw new Error("API call failed due to permission denial (403). Ensure the API key is correctly configured.");
+                    throw new Error("API call failed due to permission denial (403). Please ensure the API key is correctly configured.");
                 }
 
                 console.error(`Gemini API error (Status: ${response.status}): ${errorBody}`);
@@ -177,10 +169,11 @@ async function callGeminiApi(userQuery) {
         } catch (error) {
             retries++;
             if (retries < maxRetries) {
-                const delay = Math.pow(2, retries) * 1000; // Exponential backoff
+                const delay = Math.pow(2, retries) * 1000; // Exponential backoff (2s, 4s, 8s)
                 await new Promise(resolve => setTimeout(resolve, delay));
             } else {
                 console.error("Gemini API call failed after multiple retries:", error);
+                // Provide the user with the generalized error message shown in the screenshot
                 return { text: "Apologies, I'm having trouble connecting to my knowledge base right now. Please try again in a moment.", sources: [] };
             }
         }
@@ -192,7 +185,6 @@ async function handleSendMessage() {
     if (userQuery === "") return;
 
     addMessage(userQuery, true);
-    
     userInput.value = '';
     sendButton.disabled = true;
 
@@ -241,6 +233,7 @@ function addTypingIndicator() {
     return messageDiv;
 }
 
+// Placeholder for Firestore listeners (required by instructions)
 function setupChatListeners() {
     if (!db || !userId) return;
 
@@ -254,11 +247,12 @@ function setupChatListeners() {
     });
 }
 
+
 // --- DUAL-STAGE SPLASH SCREEN LOGIC (FIXED with Timers) ---
 window.onload = function() {
     const preSplashScreen = document.getElementById('pre-splash-screen');
     const mainSplashScreen = document.getElementById('splash-screen');
-    const splashText = mainSplashScreen.querySelector('.splash-text-container');
+    const splashText = mainSplashScreen.querySelector('.splash-text');
     
     // Stage 1: Initialize Firebase/Auth (happens in background)
     initializeFirebase();
@@ -281,7 +275,7 @@ window.onload = function() {
     };
 
     // ----------------------------------------------------
-    // Timer Chain Start (3s + 3s + 0.5s = 6.5s total delay)
+    // Timer Chain Start
     // ----------------------------------------------------
     
     // Timer 1 (3000ms): End of Image Splash
@@ -292,19 +286,16 @@ window.onload = function() {
         // B. Show the DERMATO text splash screen (Stage 2)
         mainSplashScreen.classList.remove('hidden');
         
-        // C. Start the DERMATO animation (by applying 'animate' class to children in CSS)
-        splashText.querySelectorAll('.splash-text').forEach(span => span.classList.add('animate'));
+        // C. Start the DERMATO animation (3s CSS animation)
+        splashText.classList.add('animate');
 
         // Timer 2 (3000ms): End of DERMATO Animation
         setTimeout(() => {
              // D. Start the 0.5s fade-out transition by applying 'hidden' class
-             mainSplashScreen.style.opacity = '0';
+             mainSplashScreen.classList.add('hidden');
 
              // Timer 3 (500ms): End of Fade-out Transition. Start main application.
-             setTimeout(() => {
-                mainSplashScreen.classList.add('hidden');
-                startAppCheck();
-             }, 500); 
+             setTimeout(startAppCheck, 500); 
 
         }, 3000); // 3000ms for DERMATO animation
 
