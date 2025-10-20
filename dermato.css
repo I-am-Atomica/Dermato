@@ -3,8 +3,8 @@
  */
 
 /* ======================================================================
-   1. ROOT VARIABLES & GLOBAL RESET
-   ====================================================================== */
+ * 1. ROOT VARIABLES & GLOBAL RESET
+ * ====================================================================== */
 :root {
     /* Colors - Teal Theme */
     --color-dark-bg: #0D564F; 
@@ -76,8 +76,8 @@ h1 {
 
 
 /* ======================================================================
-   2. CHAT CONTAINER & LAYOUT
-   ====================================================================== */
+ * 2. CHAT CONTAINER & LAYOUT
+ * ====================================================================== */
 
 .chat-container {
     width: 90%;
@@ -120,8 +120,8 @@ h1 {
 
 
 /* ======================================================================
-   3. MESSAGE BUBBLES
-   ====================================================================== */
+ * 3. MESSAGE BUBBLES
+ * ====================================================================== */
 
 .message {
     display: flex;
@@ -159,8 +159,8 @@ h1 {
 }
 
 /* ======================================================================
-   4. MARKDOWN STYLING INSIDE MESSAGES 
-   ====================================================================== */
+ * 4. MARKDOWN STYLING INSIDE MESSAGES 
+ * ====================================================================== */
 
 /* Lists */
 .ai-message .message-text ul,
@@ -214,8 +214,8 @@ h1 {
 }
 
 /* ======================================================================
-   4.5 TYPING INDICATOR 
-   ====================================================================== */
+ * 4.5 TYPING INDICATOR 
+ * ====================================================================== */
 .typing-indicator {
     display: flex;
     align-items: center;
@@ -257,8 +257,8 @@ h1 {
 
 
 /* ======================================================================
-   4.6 PRE-SPLASH SCREEN (Stage 1: Image)
-   ====================================================================== */
+ * 4.6 PRE-SPLASH SCREEN (Stage 1: Image)
+ * ====================================================================== */
 #pre-splash-screen {
     position: fixed;
     top: 0;
@@ -293,8 +293,8 @@ h1 {
 
 
 /* ======================================================================
-   4.7 SPLASH SCREEN ANIMATION (Stage 2: DERMATO text)
-   ====================================================================== */
+ * 4.7 SPLASH SCREEN ANIMATION (Stage 2: DERMATO text)
+ * ====================================================================== */
 #splash-screen {
     position: fixed;
     top: 0;
@@ -342,8 +342,8 @@ h1 {
 
 
 /* ======================================================================
-   5. INPUT AREA
-   ====================================================================== */
+ * 5. INPUT AREA
+ * ====================================================================== */
 
 .chat-input {
     display: flex;
@@ -410,8 +410,8 @@ h1 {
 }
 
 /* ======================================================================
-   6. RESPONSIVENESS (Mobile Adjustments)
-   ====================================================================== */
+ * 6. RESPONSIVENESS (Mobile Adjustments)
+ * ====================================================================== */
 
 @media (max-width: 600px) {
     .chat-container {
@@ -429,5 +429,46 @@ h1 {
     /* Adjust bubble max-width slightly for smaller screens */
     .message-text {
         max-width: 95%;
+    }
+}
+
+
+/* ======================================================================
+   7. AUXILIARY ELEMENTS (Credit Footer) - UPDATED STYLES
+   ====================================================================== */
+
+.credit-footer {
+    /* Positioning */
+    position: fixed;
+    bottom: var(--spacing-lg); /* 24px from the bottom */
+    left: var(--spacing-lg); /* 24px from the left */
+    z-index: 50; 
+    
+    /* Styling - UPDATED FOR SILVER COLOR */
+    font-size: 0.85rem;
+    line-height: 1.3;
+    /* Silver color */
+    color: #C0C0C0; 
+    font-family: var(--font-body); /* Already cursive (Delius) */
+    
+    /* Subtle text shadow for contrast */
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+/* Style for the names ('Atomica' and 'Mansi') to make them "fancy" */
+.credit-footer .fancy-name {
+    /* Use bold and slightly larger size for emphasis */
+    font-weight: 700;
+    font-size: 0.95rem; 
+    /* Add a subtle shine/glow to the names */
+    text-shadow: 0 0 5px rgba(192, 192, 192, 0.8);
+}
+
+/* Ensure it moves slightly for the full-screen mobile layout */
+@media (max-width: 600px) {
+    .credit-footer {
+        bottom: var(--spacing-md); 
+        left: var(--spacing-md);
+        font-size: 0.8rem;
     }
 }
