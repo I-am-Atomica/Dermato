@@ -10,7 +10,8 @@ setLogLevel('Debug');
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
 const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-const API_KEY = ""; // Required by API calls
+// IMPORTANT FIX: The API_KEY must be defined like this to be correctly substituted
+const API_KEY = "AIzaSyCqTHjq48mqB8tXC9G2qsefsrqnQ2JQjVg"; 
 
 let db;
 let auth;
@@ -152,11 +153,18 @@ async function callGeminiApi(userQuery) {
 
                 } else {
                     console.error("Gemini API returned an empty response.");
-                    return { text: "Sorry, I couldn't process that request.", sources: [] };
+                    return { text: "Sorry, I couldn't process that request. The model returned no text.", sources: [] };
                 }
             } else {
-                console.error(`Gemini API error (Status: ${response.status}): ${await response.text()}`);
-                throw new Error("API call failed.");
+                const errorBody = await response.text();
+                // Check for the specific 403 Permission Denied error and provide a better message
+                if (response.status === 403 && errorBody.includes("PERMISSION_DENIED")) {
+                    console.error(`Gemini API error (Status: 403): ${errorBody}`);
+                    throw new Error("API call failed due to permission denial (403). Please ensure the API key is correctly configured.");
+                }
+
+                console.error(`Gemini API error (Status: ${response.status}): ${errorBody}`);
+                throw new Error("API call failed with status " + response.status);
             }
         } catch (error) {
             retries++;
@@ -165,6 +173,7 @@ async function callGeminiApi(userQuery) {
                 await new Promise(resolve => setTimeout(resolve, delay));
             } else {
                 console.error("Gemini API call failed after multiple retries:", error);
+                // Provide the user with the generalized error message shown in the screenshot
                 return { text: "Apologies, I'm having trouble connecting to my knowledge base right now. Please try again in a moment.", sources: [] };
             }
         }
@@ -199,7 +208,7 @@ async function handleSendMessage() {
 
     } catch (error) {
         typingIndicator.remove();
-        addMessage("A critical error occurred while fetching the response. Please check the console.", false);
+        addMessage(`A critical error occurred: ${error.message}. Check the console for details.`, false);
     } finally {
         sendButton.disabled = false;
     }
