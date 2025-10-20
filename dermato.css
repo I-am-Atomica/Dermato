@@ -8,7 +8,7 @@
 :root {
     /* Colors - Teal Theme */
     --color-dark-bg: #0D564F; 
-    --color-card-bg: rgba(20, 107, 100, 0.3); 
+    --color-card-bg: rgba(20, 107, 100, 0.8); 
     --color-ai-bubble: #F0FBFC; 
     --color-user-bubble: #28746D; 
     --color-accent: #66FFD8; 
@@ -45,12 +45,16 @@ body {
     align-items: center;
     padding: var(--spacing-md);
     
-    /* Background Image */
-    background-image: url('https://wallpapercave.com/wp/VmZHnTO.jpg'); 
+    /* Background Image - UPDATED URL to your specific image */
+    background-image: url('https://i.imgur.com/UKWY7Wc.png'); 
     background-color: var(--color-dark-bg); /* Fallback/Base color */
     background-size: cover; 
     background-position: center; 
     background-attachment: fixed;
+    
+    /* ADDED: Backdrop filter for blur effect */
+    backdrop-filter: blur(10px); /* Adjust the pixel value (e.g., 5px, 15px) for more or less blur */
+    -webkit-backdrop-filter: blur(10px); /* For Safari support */
     
     /* Ensure no horizontal scroll on mobile */
     overflow-x: hidden;
