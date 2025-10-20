@@ -3,26 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dermato</title>
+    <title>Dermato AI Chat Assistant</title>
     
+    <!-- Link to the custom CSS -->
     <link rel="stylesheet" href="dermato.css"> 
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <!-- External Libraries -->
+    <!-- Google Fonts: Cinzel (Title) and Delius (Body Text) for guaranteed consistency -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Delius&display=swap" rel="stylesheet">
+    
+    <!-- Marked.js CDN (for rendering AI's Markdown output) -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
+    <!-- Favicon (Skincare/Botanical icon) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌿</text></svg>">
 </head>
 <body>
 
+    <!-- Pop-up Splash Screen Element -->
     <div id="splash-screen">
         <span class="splash-text">DERMATO</span>
     </div>
     
     <div class="chat-container">
-        <h1>Dermato</h1>
+        <h1>Dermato AI Assistant</h1>
         
         <div id="chat-messages" class="chat-messages">
-            </div>
+            <!-- Messages will be appended here by script.js -->
+        </div>
         
         <div class="chat-input">
             <input type="text" id="user-input" placeholder="Ask a question about your skincare routine..." autocomplete="off">
@@ -30,6 +38,7 @@
         </div>
     </div>
 
+    <!-- Link to the main JavaScript file (type="module" is critical for Gemini SDK import) -->
     <script type="module" src="script.js"></script>
 
 </body>
