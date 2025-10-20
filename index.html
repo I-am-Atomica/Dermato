@@ -3,38 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dermato AI Assistant</title>
-    <!-- Load custom CSS -->
-    <link rel="stylesheet" href="dermato.css">
-    <!-- Load Inter font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- Load Marked.js for rendering Markdown in chat messages -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.10/marked.min.js"></script>
+    <title>Dermato</title>
+    
+    <!-- Link to the custom CSS -->
+    <link rel="stylesheet" href="dermato.css"> 
+
+    <!-- External Libraries -->
+    <!-- Google Fonts: Cinzel (Title) and Delius (Body Text) for guaranteed consistency -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Delius&display=swap" rel="stylesheet">
+    
+    <!-- Marked.js CDN (for rendering AI's Markdown output) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Favicon (Skincare/Botanical icon) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌿</text></svg>">
 </head>
 <body>
 
-    <!-- Stage 1 Splash Screen (Image/Icon) -->
-    <div id="pre-splash-screen" class="splash-screen">
-        <!-- Placeholder image/icon for initial splash. Using a simple placeholder for speed. -->
-        <img src="image.png" alt="Dermato AI Icon" class="pre-splash-image">
+    <!-- Stage 1 Splash: Penguins image (highest z-index, shown immediately) -->
+    <div id="pre-splash-screen">
+        <!-- Using the image file name relative to the root directory -->
+        <img id="pre-splash-image" src="image.png" alt="Loading Penguins" />
     </div>
-
-    <!-- Stage 2 Splash Screen (Text Animation) -->
-    <div id="splash-screen" class="splash-screen hidden">
-        <div class="splash-text-container">
-            <span class="splash-text">D</span>
-            <span class="splash-text">E</span>
-            <span class="splash-text">R</span>
-            <span class="splash-text">M</span>
-            <span class="splash-text">A</span>
-            <span class="splash-text">T</span>
-            <span class="splash-text">O</span>
-        </div>
+    
+    <!-- Stage 2 Splash: DERMATO text (starts hidden, shown by JS) -->
+    <div id="splash-screen" class="hidden">
+        <span class="splash-text">DERMATO</span>
     </div>
-
+    
     <!-- Main Chat Interface (starts hidden, shown after all splash screens finish) -->
     <div class="chat-container hidden">
-        <h1>Dermato AI Assistant</h1>
+        <h1>Dermato</h1>
         
         <div id="chat-messages" class="chat-messages">
             <!-- Messages will be appended here by script.js -->
@@ -44,7 +43,6 @@
             <input type="text" id="user-input" placeholder="Ask a question about your skincare routine..." autocomplete="off">
             <button id="send-button">Send</button>
         </div>
-
     </div>
 
     <!-- Link to the main JavaScript file (type="module" is critical for Firebase/Gemini SDK import) -->
