@@ -10,11 +10,20 @@ setLogLevel('Debug');
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
 const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+const API_KEY = ""; // Required by API calls
 
 let db;
 let auth;
 let userId = null;
 let isAuthReady = false;
+
+// --- Gemini Configuration ---
+const GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025";
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${API_KEY}`;
+
+// The specific System Instruction requested by the user
+const SYSTEM_INSTRUCTION = `You are the Dermato AI Assistant, a friendly, professional, and highly knowledgeable virtual skincare advisor. You must structure all your advice using clear, valid Markdown formatting, including bolding (**), numbered lists (1.), bullet points (*), and markdown headings (##, ###) where appropriate, to maximize readability and clarity. Your goal is to provide educational, and evidence-based advice on skincare routines, ingredient functions, product types, and common dermatological topics. Keep your responses concise as possible. If the user says something out of context play it off as a joke (example: User: "I have 7 legs" -> Reply: "Damn that’s crazy man, IDK apply moisturizer or contact a chainsaw man").`;
+
 
 // --- Initialize Firebase and Authentication ---
 async function initializeFirebase() {
@@ -28,7 +37,7 @@ async function initializeFirebase() {
             if (user) {
                 userId = user.uid;
             } else {
-                // If no token, sign in anonymously
+                // If no token, sign in anonymously or use the custom token
                 if (initialAuthToken) {
                     await signInWithCustomToken(auth, initialAuthToken);
                     userId = auth.currentUser.uid;
@@ -60,8 +69,8 @@ function startMainAppFlow() {
         }
     });
 
-    // Send an initial message
-    addMessage("Sup homie, I am Mato... Dermato, Made by the suffering dwelled within Atomica and the kindle flame of Mansi ", false);
+    // Send the custom initial message
+    addMessage("Sup homie, I am Mato... Dermato, Made by the suffering dwelled with Atomica and the kindle flame of Mansi", false);
 }
 
 // --- Messaging Functions (Placeholder for actual Gemini Logic) ---
@@ -84,23 +93,116 @@ function addMessage(text, isUser = false) {
     chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; // Auto-scroll to bottom
 }
 
-function handleSendMessage() {
-    const text = userInput.value.trim();
-    if (text === "") return;
+function displaySources(sources, messageContainer) {
+    if (sources.length === 0) return;
 
-    addMessage(text, true);
+    const sourcesDiv = document.createElement('div');
+    sourcesDiv.className = 'sources-list';
+    let sourceHtml = '<p>_Sources:_</p><ol>';
+
+    sources.forEach(source => {
+        sourceHtml += `<li><a href="${source.uri}" target="_blank">${source.title || source.uri}</a></li>`;
+    });
+    sourceHtml += '</ol>';
+    sourcesDiv.innerHTML = sourceHtml;
+    messageContainer.appendChild(sourcesDiv);
+}
+
+async function callGeminiApi(userQuery) {
+    const payload = {
+        contents: [{ parts: [{ text: userQuery }] }],
+        // Enable Google Search grounding for evidence-based advice
+        tools: [{ "google_search": {} }], 
+        systemInstruction: {
+            parts: [{ text: SYSTEM_INSTRUCTION }]
+        },
+    };
+
+    let response = null;
+    let retries = 0;
+    const maxRetries = 3;
+
+    while (retries < maxRetries) {
+        try {
+            response = await fetch(GEMINI_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                const candidate = result.candidates?.[0];
+
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    const text = candidate.content.parts[0].text;
+                    
+                    let sources = [];
+                    const groundingMetadata = candidate.groundingMetadata;
+                    if (groundingMetadata && groundingMetadata.groundingAttributions) {
+                        sources = groundingMetadata.groundingAttributions
+                            .map(attribution => ({
+                                uri: attribution.web?.uri,
+                                title: attribution.web?.title,
+                            }))
+                            .filter(source => source.uri && source.title);
+                    }
+
+                    return { text, sources };
+
+                } else {
+                    console.error("Gemini API returned an empty response.");
+                    return { text: "Sorry, I couldn't process that request.", sources: [] };
+                }
+            } else {
+                console.error(`Gemini API error (Status: ${response.status}): ${await response.text()}`);
+                throw new Error("API call failed.");
+            }
+        } catch (error) {
+            retries++;
+            if (retries < maxRetries) {
+                const delay = Math.pow(2, retries) * 1000; // Exponential backoff (2s, 4s, 8s)
+                await new Promise(resolve => setTimeout(resolve, delay));
+            } else {
+                console.error("Gemini API call failed after multiple retries:", error);
+                return { text: "Apologies, I'm having trouble connecting to my knowledge base right now. Please try again in a moment.", sources: [] };
+            }
+        }
+    }
+}
+
+async function handleSendMessage() {
+    const userQuery = userInput.value.trim();
+    if (userQuery === "") return;
+
+    addMessage(userQuery, true);
     userInput.value = '';
     sendButton.disabled = true;
 
-    // Simulate AI response delay
     const typingIndicator = addTypingIndicator();
-    
-    setTimeout(() => {
+
+    try {
+        const responseData = await callGeminiApi(userQuery);
+        
+        // Remove typing indicator
         typingIndicator.remove();
-        // Placeholder response as Gemini API calls are not implemented here
-        addMessage("That's a great question. Let me find the best dermatological advice for you!", false);
+
+        // Display AI response
+        addMessage(responseData.text, false);
+        
+        // Find the newly added AI message container to attach sources
+        const aiMessageDiv = chatMessagesDiv.lastElementChild;
+        if (aiMessageDiv) {
+             const messageTextDiv = aiMessageDiv.querySelector('.message-text');
+             displaySources(responseData.sources, messageTextDiv);
+        }
+
+    } catch (error) {
+        typingIndicator.remove();
+        addMessage("A critical error occurred while fetching the response. Please check the console.", false);
+    } finally {
         sendButton.disabled = false;
-    }, 2500);
+    }
 }
 
 function addTypingIndicator() {
@@ -126,6 +228,7 @@ function addTypingIndicator() {
 function setupChatListeners() {
     if (!db || !userId) return;
 
+    // We listen to a collection specific to the user
     const messagesCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/messages`);
     const q = query(messagesCollectionRef, orderBy('timestamp'));
 
@@ -136,7 +239,7 @@ function setupChatListeners() {
 }
 
 
-// --- DUAL-STAGE SPLASH SCREEN LOGIC ---
+// --- DUAL-STAGE SPLASH SCREEN LOGIC (FIXED with Timers) ---
 window.onload = function() {
     const preSplashScreen = document.getElementById('pre-splash-screen');
     const mainSplashScreen = document.getElementById('splash-screen');
@@ -145,7 +248,28 @@ window.onload = function() {
     // Stage 1: Initialize Firebase/Auth (happens in background)
     initializeFirebase();
 
-    // Stage 2: Show the image for 3 seconds
+    // Helper function to wait for auth and then start the main app
+    const startAppCheck = () => {
+        if (isAuthReady) {
+            startMainAppFlow();
+        } else {
+            // Poll every 100ms until auth is ready or time runs out 
+            let checkCount = 0;
+            const authInterval = setInterval(() => {
+                checkCount++;
+                if (isAuthReady || checkCount > 20) { // Check for max 2 seconds
+                    clearInterval(authInterval);
+                    startMainAppFlow(); 
+                }
+            }, 100);
+        }
+    };
+
+    // ----------------------------------------------------
+    // Timer Chain Start
+    // ----------------------------------------------------
+    
+    // Timer 1 (3000ms): End of Image Splash
     setTimeout(() => {
         // A. Hide the image splash screen (Stage 1)
         preSplashScreen.classList.add('hidden');
@@ -153,33 +277,18 @@ window.onload = function() {
         // B. Show the DERMATO text splash screen (Stage 2)
         mainSplashScreen.classList.remove('hidden');
         
-        // C. Start the DERMATO animation by adding the 'animate' class
+        // C. Start the DERMATO animation (3s CSS animation)
         splashText.classList.add('animate');
 
-        // D. After the DERMATO animation duration (3s), start the fade-out process
+        // Timer 2 (3000ms): End of DERMATO Animation
         setTimeout(() => {
+             // D. Start the 0.5s fade-out transition by applying 'hidden' class
              mainSplashScreen.classList.add('hidden');
-        }, 3000); 
 
-        // E. Listen for the main splash screen transition to complete its fade-out
-        mainSplashScreen.addEventListener('transitionend', (event) => {
-            // Check if the transition that just ended is the main opacity transition
-            // and the screen is actually hidden
-            if (event.propertyName === 'opacity' && mainSplashScreen.classList.contains('hidden')) {
-                // If we are already authenticated, start the app immediately.
-                if (isAuthReady) {
-                    startMainAppFlow();
-                } else {
-                    // Otherwise, wait for auth to finish
-                    const authInterval = setInterval(() => {
-                        if (isAuthReady) {
-                            clearInterval(authInterval);
-                            startMainAppFlow();
-                        }
-                    }, 100);
-                }
-            }
-        });
+             // Timer 3 (500ms): End of Fade-out Transition. Start main application.
+             setTimeout(startAppCheck, 500); 
 
-    }, 3000); // 3000ms = 3 seconds delay for the image splash
+        }, 3000); // 3000ms for DERMATO animation
+
+    }, 3000); // 3000ms for image splash
 }
