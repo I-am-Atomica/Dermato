@@ -12,7 +12,7 @@
     --color-ai-bubble: #F0FBFC; /* Near-White/Clinical for AI messages */
     --color-user-bubble: #28746D; /* Medium Teal for User messages */
     --color-accent: #66FFD8; /* Light Mint/Cyan for buttons and focus (high contrast) */
-    --color-text-light: #B2ECF3; /* Light text (used everywhere) */
+    --color-text-light: #F0FBFC; /* Light text (used everywhere) */
     --color-text-dark: #146B64; /* Dark text (used on light AI bubble) */
 
     /* Typography */
@@ -201,7 +201,7 @@ h1 {
 }
 
 /* ======================================================================
-   4.5 TYPING INDICATOR (New Section for the Animation)
+   4.5 TYPING INDICATOR 
    ====================================================================== */
 .typing-indicator {
     display: flex;
@@ -240,6 +240,56 @@ h1 {
         transform: scale(1.0);
         opacity: 1;
     }
+}
+
+
+/* ======================================================================
+   4.7 SPLASH SCREEN ANIMATION (NEW)
+   ====================================================================== */
+#splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-dark-bg); /* Use the deep teal background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure it is on top of everything */
+    opacity: 1;
+    pointer-events: all; /* Allows it to block interaction initially */
+    transition: opacity 0.5s ease-out, visibility 0.5s;
+}
+
+#splash-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.splash-text {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--color-accent);
+    letter-spacing: 0.2em;
+    opacity: 0;
+    animation: pop-in-and-out 3s ease-in-out forwards;
+    text-shadow: 0 0 20px rgba(102, 255, 216, 0.9);
+    transform: scale(0.5); /* Start small */
+}
+
+@keyframes pop-in-and-out {
+    /* Stage 1: Pop In (0% to 20%) */
+    0% { transform: scale(0.5); opacity: 0; }
+    20% { transform: scale(1.1); opacity: 1; }
+    30% { transform: scale(1); opacity: 1; }
+    
+    /* Stage 2: Hold (30% to 70%) */
+    70% { transform: scale(1); opacity: 1; }
+
+    /* Stage 3: Pop Down/Fade Out (70% to 100%) */
+    100% { transform: scale(0.5); opacity: 0; }
 }
 
 
