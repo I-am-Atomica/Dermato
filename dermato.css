@@ -43,7 +43,7 @@ body {
     align-items: center;
     padding: var(--spacing-md);
     
-    /* Background Image (Using the image you specified earlier) */
+    /* Background Image */
     background-image: url('https://wallpapercave.com/wp/VmZHnTO.jpg'); 
     background-color: var(--color-dark-bg); /* Fallback/Base color */
     background-size: cover; 
@@ -85,22 +85,26 @@ h1 {
     overflow-y: auto;
     padding: var(--spacing-sm);
     margin-bottom: var(--spacing-md);
-    /* Make the scrollbar look decent on dark mode */
+    
+    /* NEW: Firefox Scrollbar Style */
     scrollbar-color: var(--color-accent) var(--color-card-bg);
     scrollbar-width: thin;
 }
 
-/* Webkit Scrollbar Styling (Chrome, Safari) */
+/* Webkit Scrollbar Styling (Chrome, Safari, Edge) */
 .chat-messages::-webkit-scrollbar {
     width: 8px;
 }
 .chat-messages::-webkit-scrollbar-thumb {
-    background-color: var(--color-accent);
+    /* Uses the bright mint accent color */
+    background-color: var(--color-accent); 
     border-radius: 10px;
+    border: 2px solid var(--color-card-bg); /* Adds padding/separation */
 }
 .chat-messages::-webkit-scrollbar-track {
-    background: var(--color-card-bg);
+    background: var(--color-card-bg); /* Dark teal track */
 }
+
 
 /* ======================================================================
    3. MESSAGE BUBBLES
@@ -218,10 +222,14 @@ h1 {
     transition: border-color 0.2s ease, box-shadow 0.2s;
 }
 
+/* Input Field Glow (Focus) */
 #user-input:focus {
     outline: none;
     border-color: var(--color-accent);
-    box-shadow: 0 0 0 2px rgba(102, 255, 216, 0.5);
+    /* NEW: Enhanced glow effect */
+    box-shadow: 
+        0 0 10px rgba(0, 0, 0, 0.5), 
+        0 0 8px rgba(102, 255, 216, 0.7); 
 }
 
 /* Button */
@@ -238,9 +246,13 @@ h1 {
     flex-shrink: 0;
 }
 
+/* Send Button Glow (Hover) */
 #send-button:hover:not(:disabled) {
     background-color: #99FFEE;
-    box-shadow: 0 4px 10px rgba(102, 255, 216, 0.3);
+    /* NEW: Enhanced glow effect */
+    box-shadow: 
+        0 4px 15px rgba(102, 255, 216, 0.6), 
+        0 0 10px rgba(102, 255, 216, 0.4); 
 }
 
 #send-button:active:not(:disabled) {
