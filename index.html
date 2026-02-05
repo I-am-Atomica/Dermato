@@ -23,10 +23,28 @@
             
             <div id="chat-messages" class="chat-messages"></div>
             
-            <div class="chat-input">
-                <input type="text" id="user-input" placeholder="Ask a question about your skincare routine..." autocomplete="off">
-                <button id="send-button">Send</button>
-            </div>
+            <div class="chat-input-container">
+    <div id="image-preview-container" class="hidden">
+        <div class="preview-wrapper">
+            <img id="image-preview" src="" alt="Upload Preview">
+            <button id="remove-image">×</button>
+        </div>
+    </div>
+
+    <div class="chat-input">
+        <input type="file" id="file-input" accept="image/png, image/jpeg, image/webp, image/heic" hidden>
+        
+        <label for="file-input" class="upload-button" title="Upload an image">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+        </label>
+
+        <input type="text" id="user-input" placeholder="Ask a question or upload a photo..." autocomplete="off">
+        <button id="send-button">Send</button>
+    </div>
+</div>
         </div>
         
     </main>
