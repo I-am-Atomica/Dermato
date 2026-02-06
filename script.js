@@ -139,22 +139,25 @@ function animateTitle() {
     const title = document.querySelector('h1');
     const originalText = "Dermato";
     const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-    let iterations = 0;
     
     anime({
         targets: { val: 0 },
         val: 100,
         round: 1,
-        duration: 1500,
+        duration: 4000, // <--- CHANGE THIS NUMBER (e.g., 4000 = 4 seconds)
         easing: 'easeOutExpo',
-        update: function() {
+        update: function(anim) {
+            // This calculates how many letters should be revealed based on the % progress
+            const iterations = (anim.progress / 100) * originalText.length;
+            
             title.innerText = originalText.split("")
                 .map((letter, index) => {
-                    if (index < iterations) return originalText[index];
+                    if (index < iterations) {
+                        return originalText[index];
+                    }
                     return letters[Math.floor(Math.random() * letters.length)];
                 })
                 .join("");
-            iterations += 1 / 2; 
         }
     });
 }
