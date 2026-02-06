@@ -5,7 +5,7 @@ const API_KEY = "AIzaSyCqTHjq48mqB8tXC9G2qsefsrqnQ2JQjVg";
 const GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025";
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${API_KEY}`;
 
-const SYSTEM_INSTRUCTION = `You are the Dermato AI Assistant, a friendly, professional, and highly knowledgeable virtual skincare advisor. You must structure all your advice using clear, valid Markdown formatting. If the user provides an image, analyze the skin condition, product label, or ingredients visible in the image professionally. Keep responses concise.`;
+const SYSTEM_INSTRUCTION = `You are the Dermato AI Assistant. Structure advice using clear Markdown. If an image is provided, analyze the skin condition or product professionally. Keep responses concise.`;
 
 // --- UI Elements ---
 const chatMessagesDiv = document.getElementById('chat-messages');
@@ -16,68 +16,155 @@ const imagePreviewContainer = document.getElementById('image-preview-container')
 const imagePreview = document.getElementById('image-preview');
 const removeImageBtn = document.getElementById('remove-image');
 
-// State for the uploaded image
+// State
 let currentImageBase64 = null;
 let currentImageMimeType = null;
 
-// --- Main App Flow ---
+// --- 1. SPLASH SCREEN (Anime.js Timeline) ---
+window.onload = function() {
+    const mainSplashScreen = document.getElementById('splash-screen');
+    const splashText = mainSplashScreen.querySelector('.splash-text');
+    
+    // Split text into letters for individual animation
+    splashText.innerHTML = splashText.textContent.replace(/\S/g, "<span class='letter'>$&</span>");
+    
+    mainSplashScreen.classList.remove('hidden');
+
+    // Create a timeline
+    const tl = anime.timeline({
+        easing: 'easeOutExpo',
+        duration: 1000
+    });
+
+    tl
+    // 1. Letters float in and expand
+    .add({
+        targets: '.splash-text .letter',
+        scale: [0, 1],
+        opacity: [0, 1],
+        translateY: ["1.5em", 0],
+        translateZ: 0,
+        duration: 1200,
+        delay: anime.stagger(100) // 100ms delay between each letter
+    })
+    // 2. Pause to let user read
+    .add({
+        duration: 1000 
+    })
+    // 3. Fade out and scale down
+    .add({
+        targets: '.splash-text',
+        opacity: 0,
+        scale: 1.5, // Zooms out while fading
+        duration: 800,
+        easing: 'easeInQuad',
+        complete: function() {
+            mainSplashScreen.classList.add('hidden');
+            startMainAppFlow();
+        }
+    });
+}
+
 function startMainAppFlow() {
     const chatContainer = document.querySelector('.chat-container');
     chatContainer.classList.remove('hidden');
+    
+    // Animate the container popping in
+    anime({
+        targets: '.chat-container',
+        scale: [0.9, 1],
+        opacity: [0, 1],
+        duration: 800,
+        easing: 'easeOutElastic(1, .8)'
+    });
 
     setupEventListeners();
-
-    addMessage("Sup homie, I am Mato... Dermato. Send me a photo of a product or a skin concern, and I'll do my best to help!", false);
+    addMessage("Sup homie, I am Mato... Dermato. Send me a photo or ask a question!", false);
 }
 
 function setupEventListeners() {
-    // Send Button & Enter Key
     sendButton.addEventListener('click', handleSendMessage);
     userInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleSendMessage();
     });
-
-    // File Input Change
     fileInput.addEventListener('change', handleFileSelect);
-
-    // Remove Image Button
     removeImageBtn.addEventListener('click', clearImageSelection);
 }
 
-// --- Image Handling Logic ---
+// --- 2. ANIMATION HELPERS ---
+
+// Effect: "Hydro-Elastic" Button Click
+function animateButton() {
+    anime({
+        targets: '#send-button',
+        scale: [0.9, 1], // Squish then return
+        duration: 600,
+        easing: 'easeOutElastic(1, .5)' 
+    });
+}
+
+// Effect: "Serum Drip" Message Entrance
+function animateNewMessage(element) {
+    // If it's an image, simple fade
+    if (element.querySelector('img')) {
+        anime({
+            targets: element,
+            opacity: [0, 1],
+            translateY: [20, 0],
+            duration: 800,
+            easing: 'easeOutCubic'
+        });
+    } else {
+        // If it's text, we can try to stagger paragraphs if any exist, 
+        // otherwise just animate the whole bubble
+        anime({
+            targets: element,
+            opacity: [0, 1],
+            translateX: [-20, 0], // Slide in from left slightly
+            duration: 600,
+            easing: 'easeOutQuad'
+        });
+    }
+}
+
+// --- Image Handling ---
 function handleFileSelect(event) {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Check file type
     if (!file.type.startsWith('image/')) {
-        alert("Please upload an image file (PNG, JPG, WEBP).");
+        alert("Please upload an image file.");
         return;
     }
 
     const reader = new FileReader();
     reader.onloadend = () => {
-        // 1. Show Preview
         imagePreview.src = reader.result;
         imagePreviewContainer.classList.remove('hidden');
+        
+        // Pop in the preview
+        anime({
+            targets: '#image-preview-container',
+            translateY: [10, 0],
+            opacity: [0, 1],
+            duration: 400,
+            easing: 'easeOutQuad'
+        });
 
-        // 2. Store Base64 (Remove the "data:image/jpeg;base64," prefix for API)
-        const base64String = reader.result.split(',')[1];
-        currentImageBase64 = base64String;
+        currentImageBase64 = reader.result.split(',')[1];
         currentImageMimeType = file.type;
     };
     reader.readAsDataURL(file);
 }
 
 function clearImageSelection() {
-    fileInput.value = ''; // Reset input
+    fileInput.value = '';
     currentImageBase64 = null;
     currentImageMimeType = null;
-    imagePreview.src = '';
     imagePreviewContainer.classList.add('hidden');
 }
 
-// --- Messaging Functions ---
+// --- Messaging ---
 function addMessage(text, isUser = false, imageUrl = null) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
@@ -85,7 +172,6 @@ function addMessage(text, isUser = false, imageUrl = null) {
     const messageText = document.createElement('div');
     messageText.className = 'message-text';
 
-    // If there is an image, append it first
     if (imageUrl) {
         const img = document.createElement('img');
         img.src = imageUrl;
@@ -93,7 +179,6 @@ function addMessage(text, isUser = false, imageUrl = null) {
         messageText.appendChild(img);
     }
 
-    // Append text (parsed markdown)
     const textSpan = document.createElement('div');
     textSpan.innerHTML = isUser ? text : marked.parse(text);
     messageText.appendChild(textSpan);
@@ -101,18 +186,16 @@ function addMessage(text, isUser = false, imageUrl = null) {
     messageDiv.appendChild(messageText);
     chatMessagesDiv.appendChild(messageDiv);
     chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+
+    // Trigger Animation on the new bubble
+    animateNewMessage(messageDiv);
 }
 
 async function callGeminiApi(userQuery, imageData) {
-    // Construct Parts: Always include text, optionally include image
     const parts = [{ text: userQuery }];
-    
     if (imageData) {
         parts.push({
-            inlineData: {
-                mimeType: imageData.mimeType,
-                data: imageData.data
-            }
+            inlineData: { mimeType: imageData.mimeType, data: imageData.data }
         });
     }
 
@@ -128,38 +211,29 @@ async function callGeminiApi(userQuery, imageData) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
-
-        if (!response.ok) {
-            throw new Error(`API Error: ${response.status}`);
-        }
-
-        const result = await response.json();
-        const candidate = result.candidates?.[0];
         
-        if (candidate?.content?.parts?.[0]?.text) {
-            return { text: candidate.content.parts[0].text, sources: [] }; // Simplified sources for now
-        }
-        return { text: "I couldn't analyze that. Please try again.", sources: [] };
+        if (!response.ok) throw new Error(response.status);
+        const result = await response.json();
+        return { text: result.candidates?.[0]?.content?.parts?.[0]?.text || "No response." };
 
     } catch (error) {
-        console.error("Gemini API Error:", error);
-        return { text: "Sorry, connection error. Please try again.", sources: [] };
+        console.error(error);
+        return { text: "Connection error." };
     }
 }
 
 async function handleSendMessage() {
     const userQuery = userInput.value.trim();
-    // Allow sending if there is text OR an image
     if (userQuery === "" && !currentImageBase64) return;
 
-    // Capture current image state to pass to function (in case user clears it while waiting)
-    const imageToSend = currentImageBase64 ? { mimeType: currentImageMimeType, data: currentImageBase64 } : null;
-    const previewUrl = imagePreview.src; // Save for display
+    // 1. Trigger Button Animation
+    animateButton();
 
-    // Display User Message
+    const imageToSend = currentImageBase64 ? { mimeType: currentImageMimeType, data: currentImageBase64 } : null;
+    const previewUrl = imagePreview.src;
+
     addMessage(userQuery, true, imageToSend ? previewUrl : null);
 
-    // Clear Inputs immediately
     userInput.value = '';
     clearImageSelection();
     sendButton.disabled = true;
@@ -181,25 +255,19 @@ async function handleSendMessage() {
 function addTypingIndicator() {
     const messageDiv = document.createElement('div');
     messageDiv.className = 'message ai-message';
-    const messageText = document.createElement('div');
-    messageText.className = 'message-text typing-indicator-container';
-    messageText.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
-    messageDiv.appendChild(messageText);
+    messageDiv.innerHTML = `<div class="message-text typing-indicator-container"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`;
+    
     chatMessagesDiv.appendChild(messageDiv);
     chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; 
-    return messageDiv;
-}
-
-// --- Splash Screen Logic ---
-window.onload = function() {
-    const mainSplashScreen = document.getElementById('splash-screen');
-    const splashText = mainSplashScreen.querySelector('.splash-text');
     
-    mainSplashScreen.classList.remove('hidden');
-    splashText.classList.add('animate');
-
-    setTimeout(() => {
-            mainSplashScreen.classList.add('hidden');
-            setTimeout(startMainAppFlow, 500); 
-    }, 3000); 
+    // Animate the typing indicator bubbling up
+    anime({
+        targets: messageDiv,
+        scale: [0.8, 1],
+        opacity: [0, 1],
+        duration: 400,
+        easing: 'easeOutBack'
+    });
+    
+    return messageDiv;
 }
