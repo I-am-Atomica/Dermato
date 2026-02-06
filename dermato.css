@@ -276,16 +276,9 @@ h1 {
     transform: scale(0.5);
 }
 
-.splash-text.animate {
-    animation: pop-in-and-out 3s ease-in-out forwards;
-}
-
-@keyframes pop-in-and-out {
-    0% { transform: scale(0.5); opacity: 0; }
-    20% { transform: scale(1.1); opacity: 1; }
-    30% { transform: scale(1); opacity: 1; }
-    70% { transform: scale(1); opacity: 1; }
-    100% { transform: scale(0.5); opacity: 0; }
+.splash-text .letter {
+    display: inline-block; /* Required for transform animations on text */
+    transform-origin: bottom center;
 }
 
 
