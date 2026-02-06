@@ -1,8 +1,6 @@
 // --- Global Setup ---
-// IMPORTANT: Use the API Key exactly as provided
 const API_KEY = "AIzaSyDgjL0IZ1PuBAHAu2Y42BVJGmSGVj37dqI"; 
 
-// --- Gemini Configuration ---
 const GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025";
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${API_KEY}`;
 
@@ -21,12 +19,10 @@ const removeImageBtn = document.getElementById('remove-image');
 let currentImageBase64 = null;
 let currentImageMimeType = null;
 
-// --- 1. SPLASH SCREEN (Anime.js Timeline) ---
+// --- 1. STARTUP SEQUENCE ---
 window.onload = function() {
-    // Check if anime.js is loaded
     if (typeof anime === 'undefined') {
-        console.error("Anime.js is not loaded! Check your HTML <head> for the script tag.");
-        // Fallback: just show the app if animation fails so the site still works
+        console.error("Anime.js is not loaded!");
         startMainAppFlow();
         return;
     }
@@ -34,41 +30,28 @@ window.onload = function() {
     const mainSplashScreen = document.getElementById('splash-screen');
     const splashText = mainSplashScreen.querySelector('.splash-text');
     
-    // Split text into letters for individual animation
+    // Prepare Letters
     splashText.innerHTML = splashText.textContent.replace(/\S/g, "<span class='letter'>$&</span>");
-    
-    // FIX: Make the text visible so the letters can be seen
     splashText.style.opacity = '1';
-    
-    // Show the splash container
     mainSplashScreen.classList.remove('hidden');
 
-    // Create a timeline
-    const tl = anime.timeline({
-        easing: 'easeOutExpo',
-        duration: 1000
-    });
+    // Splash Timeline
+    const tl = anime.timeline({ easing: 'easeOutExpo', duration: 1000 });
 
-    tl
-    // 1. Letters float in and expand
-    .add({
+    tl.add({
         targets: '.splash-text .letter',
         scale: [0, 1],
         opacity: [0, 1],
         translateY: ["1.5em", 0],
         translateZ: 0,
         duration: 1200,
-        delay: anime.stagger(100) // 100ms delay between each letter
+        delay: anime.stagger(100)
     })
-    // 2. Pause to let user read
-    .add({
-        duration: 1000 
-    })
-    // 3. Fade out and scale down
+    .add({ duration: 1000 }) // Wait
     .add({
         targets: '.splash-text',
         opacity: 0,
-        scale: 1.5, // Zooms out while fading
+        scale: 1.5,
         duration: 800,
         easing: 'easeInQuad',
         complete: function() {
@@ -83,21 +66,100 @@ function startMainAppFlow() {
     if(chatContainer) {
         chatContainer.classList.remove('hidden');
         
-        // Animate the container popping in
-        if (typeof anime !== 'undefined') {
-            anime({
-                targets: '.chat-container',
-                scale: [0.9, 1],
-                opacity: [0, 1],
-                duration: 800,
-                easing: 'easeOutElastic(1, .8)'
-            });
-        }
+        // Pop In Animation
+        anime({
+            targets: '.chat-container',
+            scale: [0.9, 1],
+            opacity: [0, 1],
+            duration: 800,
+            easing: 'easeOutElastic(1, .8)'
+        });
     }
+
+    // Start Ambient Effects
+    startAmbientParticles();
+    animateTitle();
 
     setupEventListeners();
     addMessage("Sup homie, I am Mato... Dermato. Send me a photo or ask a question!", false);
 }
+
+// --- 2. AMBIENT EFFECTS ---
+
+// A. Floating "Serum" Bubbles
+function startAmbientParticles() {
+    const container = document.getElementById('particles-container');
+    if(!container) return;
+    
+    const particleCount = 15; // Number of bubbles
+
+    for (let i = 0; i < particleCount; i++) {
+        const p = document.createElement('div');
+        p.classList.add('particle');
+        container.appendChild(p);
+
+        // Random Initial State
+        anime.set(p, {
+            x: anime.random(0, window.innerWidth),
+            y: anime.random(0, window.innerHeight),
+            scale: anime.random(0.2, 1.5),
+            opacity: anime.random(0.1, 0.4)
+        });
+
+        animateParticle(p);
+    }
+}
+
+function animateParticle(el) {
+    anime({
+        targets: el,
+        y: [{ value: '-=100', duration: anime.random(3000, 8000) }],
+        x: [
+             { value: '+=50', duration: anime.random(2000, 5000), easing: 'easeInOutSine' },
+             { value: '-=50', duration: anime.random(2000, 5000), easing: 'easeInOutSine' }
+        ],
+        opacity: [
+            { value: 0, duration: 1000, easing: 'linear' },
+            { value: anime.random(0.1, 0.4), duration: 1000, easing: 'linear' }
+        ],
+        scale: [
+             { value: 0, duration: 1000, easing: 'easeOutSine' },
+             { value: anime.random(0.2, 1.5), duration: 1000, easing: 'easeInSine' }
+        ],
+        delay: anime.random(0, 5000),
+        duration: anime.random(5000, 10000),
+        loop: true,
+        direction: 'alternate',
+        easing: 'linear'
+    });
+}
+
+// B. Decoding Title Effect
+function animateTitle() {
+    const title = document.querySelector('h1');
+    const originalText = "Dermato";
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+    let iterations = 0;
+    
+    anime({
+        targets: { val: 0 },
+        val: 100,
+        round: 1,
+        duration: 1500,
+        easing: 'easeOutExpo',
+        update: function() {
+            title.innerText = originalText.split("")
+                .map((letter, index) => {
+                    if (index < iterations) return originalText[index];
+                    return letters[Math.floor(Math.random() * letters.length)];
+                })
+                .join("");
+            iterations += 1 / 2; 
+        }
+    });
+}
+
+// --- 3. INTERACTION LOGIC ---
 
 function setupEventListeners() {
     if(sendButton) sendButton.addEventListener('click', handleSendMessage);
@@ -110,22 +172,16 @@ function setupEventListeners() {
     if(removeImageBtn) removeImageBtn.addEventListener('click', clearImageSelection);
 }
 
-// --- 2. ANIMATION HELPERS ---
-
 function animateButton() {
-    if (typeof anime !== 'undefined') {
-        anime({
-            targets: '#send-button',
-            scale: [0.9, 1], 
-            duration: 600,
-            easing: 'easeOutElastic(1, .5)' 
-        });
-    }
+    anime({
+        targets: '#send-button',
+        scale: [0.9, 1], 
+        duration: 600,
+        easing: 'easeOutElastic(1, .5)' 
+    });
 }
 
 function animateNewMessage(element) {
-    if (typeof anime === 'undefined') return;
-
     if (element.querySelector('img')) {
         anime({
             targets: element,
@@ -145,7 +201,8 @@ function animateNewMessage(element) {
     }
 }
 
-// --- Image Handling ---
+// --- 4. IMAGE & API LOGIC ---
+
 function handleFileSelect(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -160,15 +217,13 @@ function handleFileSelect(event) {
         imagePreview.src = reader.result;
         imagePreviewContainer.classList.remove('hidden');
         
-        if (typeof anime !== 'undefined') {
-            anime({
-                targets: '#image-preview-container',
-                translateY: [10, 0],
-                opacity: [0, 1],
-                duration: 400,
-                easing: 'easeOutQuad'
-            });
-        }
+        anime({
+            targets: '#image-preview-container',
+            translateY: [10, 0],
+            opacity: [0, 1],
+            duration: 400,
+            easing: 'easeOutQuad'
+        });
 
         currentImageBase64 = reader.result.split(',')[1];
         currentImageMimeType = file.type;
@@ -183,7 +238,6 @@ function clearImageSelection() {
     imagePreviewContainer.classList.add('hidden');
 }
 
-// --- Messaging ---
 function addMessage(text, isUser = false, imageUrl = null) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
@@ -199,7 +253,6 @@ function addMessage(text, isUser = false, imageUrl = null) {
     }
 
     const textSpan = document.createElement('div');
-    // Check if marked is available
     if (typeof marked !== 'undefined') {
         textSpan.innerHTML = isUser ? text : marked.parse(text);
     } else {
@@ -207,7 +260,6 @@ function addMessage(text, isUser = false, imageUrl = null) {
     }
     
     messageText.appendChild(textSpan);
-    
     messageDiv.appendChild(messageText);
     chatMessagesDiv.appendChild(messageDiv);
     chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
@@ -225,7 +277,6 @@ async function callGeminiApi(userQuery, imageData) {
 
     const payload = {
         contents: [{ parts: parts }],
-        // IMPORTANT: Tools are commented out to prevent 400 Bad Request errors on basic setup
         // tools: [{ "google_search": {} }], 
         systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
     };
@@ -237,13 +288,9 @@ async function callGeminiApi(userQuery, imageData) {
             body: JSON.stringify(payload)
         });
         
-        // DEBUG: Detailed Error Reporting
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             const errorMessage = errorData.error?.message || response.statusText;
-            console.error("Full Error Data:", errorData);
-            
-            // Return specific error to chat bubble so we can see it
             return { text: `API Connection Failed (${response.status}): ${errorMessage}` };
         }
 
@@ -289,19 +336,15 @@ function addTypingIndicator() {
     const messageDiv = document.createElement('div');
     messageDiv.className = 'message ai-message';
     messageDiv.innerHTML = `<div class="message-text typing-indicator-container"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`;
-    
     chatMessagesDiv.appendChild(messageDiv);
     chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; 
     
-    if (typeof anime !== 'undefined') {
-        anime({
-            targets: messageDiv,
-            scale: [0.8, 1],
-            opacity: [0, 1],
-            duration: 400,
-            easing: 'easeOutBack'
-        });
-    }
-    
+    anime({
+        targets: messageDiv,
+        scale: [0.8, 1],
+        opacity: [0, 1],
+        duration: 400,
+        easing: 'easeOutBack'
+    });
     return messageDiv;
 }
