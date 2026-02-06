@@ -27,6 +27,7 @@ window.onload = function() {
     
     // Split text into letters for individual animation
     splashText.innerHTML = splashText.textContent.replace(/\S/g, "<span class='letter'>$&</span>");
+    splashText.style.opacity = 1; 
     
     mainSplashScreen.classList.remove('hidden');
 
