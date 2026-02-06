@@ -202,6 +202,35 @@ async function callGeminiApi(userQuery, imageData) {
 
     const payload = {
         contents: [{ parts: parts }],
+        // tools: [{ "google_search": {} }], // Comment out tools if getting 400 errors to test basic chat first
+        systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
+    };
+
+    try {
+        const response = await fetch(GEMINI_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        // DEBUG: If not OK, print the error text to the chat
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            const errorMessage = errorData.error?.message || response.statusText;
+            throw new Error(`${response.status}: ${errorMessage}`);
+        }
+
+        const result = await response.json();
+        return { text: result.candidates?.[0]?.content?.parts?.[0]?.text || "No response." };
+
+    } catch (error) {
+        console.error("Gemini API Error details:", error);
+        return { text: `API Error: ${error.message}` };
+    }
+}
+
+    const payload = {
+        contents: [{ parts: parts }],
         tools: [{ "google_search": {} }], 
         systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
     };
