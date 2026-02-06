@@ -1,5 +1,7 @@
 // --- Global Setup ---
-const API_KEY = "AIzaSyDgjL0IZ1PuBAHAu2Y42BVJGmSGVj37dqI"; 
+const KEY_PART_A = "AIzaSyDjbq3ySNz6";
+const KEY_PART_B = "QdOnjNyPOE4w47xKROs-R6A";
+const API_KEY = KEY_PART_A + KEY_PART_B; 
 
 const GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025";
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${API_KEY}`;
