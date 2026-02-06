@@ -1,4 +1,5 @@
 // --- Global Setup ---
+// IMPORTANT: Use the API Key exactly as provided
 const API_KEY = "AIzaSyCqTHjq48mqB8tXC9G2qsefsrqnQ2JQjVg"; 
 
 // --- Gemini Configuration ---
@@ -22,13 +23,24 @@ let currentImageMimeType = null;
 
 // --- 1. SPLASH SCREEN (Anime.js Timeline) ---
 window.onload = function() {
+    // Check if anime.js is loaded
+    if (typeof anime === 'undefined') {
+        console.error("Anime.js is not loaded! Check your HTML <head> for the script tag.");
+        // Fallback: just show the app if animation fails so the site still works
+        startMainAppFlow();
+        return;
+    }
+
     const mainSplashScreen = document.getElementById('splash-screen');
     const splashText = mainSplashScreen.querySelector('.splash-text');
     
     // Split text into letters for individual animation
     splashText.innerHTML = splashText.textContent.replace(/\S/g, "<span class='letter'>$&</span>");
-    splashText.style.opacity = 1; 
     
+    // FIX: Make the text visible so the letters can be seen
+    splashText.style.opacity = '1';
+    
+    // Show the splash container
     mainSplashScreen.classList.remove('hidden');
 
     // Create a timeline
@@ -68,45 +80,52 @@ window.onload = function() {
 
 function startMainAppFlow() {
     const chatContainer = document.querySelector('.chat-container');
-    chatContainer.classList.remove('hidden');
-    
-    // Animate the container popping in
-    anime({
-        targets: '.chat-container',
-        scale: [0.9, 1],
-        opacity: [0, 1],
-        duration: 800,
-        easing: 'easeOutElastic(1, .8)'
-    });
+    if(chatContainer) {
+        chatContainer.classList.remove('hidden');
+        
+        // Animate the container popping in
+        if (typeof anime !== 'undefined') {
+            anime({
+                targets: '.chat-container',
+                scale: [0.9, 1],
+                opacity: [0, 1],
+                duration: 800,
+                easing: 'easeOutElastic(1, .8)'
+            });
+        }
+    }
 
     setupEventListeners();
     addMessage("Sup homie, I am Mato... Dermato. Send me a photo or ask a question!", false);
 }
 
 function setupEventListeners() {
-    sendButton.addEventListener('click', handleSendMessage);
-    userInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleSendMessage();
-    });
-    fileInput.addEventListener('change', handleFileSelect);
-    removeImageBtn.addEventListener('click', clearImageSelection);
+    if(sendButton) sendButton.addEventListener('click', handleSendMessage);
+    if(userInput) {
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSendMessage();
+        });
+    }
+    if(fileInput) fileInput.addEventListener('change', handleFileSelect);
+    if(removeImageBtn) removeImageBtn.addEventListener('click', clearImageSelection);
 }
 
 // --- 2. ANIMATION HELPERS ---
 
-// Effect: "Hydro-Elastic" Button Click
 function animateButton() {
-    anime({
-        targets: '#send-button',
-        scale: [0.9, 1], // Squish then return
-        duration: 600,
-        easing: 'easeOutElastic(1, .5)' 
-    });
+    if (typeof anime !== 'undefined') {
+        anime({
+            targets: '#send-button',
+            scale: [0.9, 1], 
+            duration: 600,
+            easing: 'easeOutElastic(1, .5)' 
+        });
+    }
 }
 
-// Effect: "Serum Drip" Message Entrance
 function animateNewMessage(element) {
-    // If it's an image, simple fade
+    if (typeof anime === 'undefined') return;
+
     if (element.querySelector('img')) {
         anime({
             targets: element,
@@ -116,12 +135,10 @@ function animateNewMessage(element) {
             easing: 'easeOutCubic'
         });
     } else {
-        // If it's text, we can try to stagger paragraphs if any exist, 
-        // otherwise just animate the whole bubble
         anime({
             targets: element,
             opacity: [0, 1],
-            translateX: [-20, 0], // Slide in from left slightly
+            translateX: [-20, 0], 
             duration: 600,
             easing: 'easeOutQuad'
         });
@@ -143,14 +160,15 @@ function handleFileSelect(event) {
         imagePreview.src = reader.result;
         imagePreviewContainer.classList.remove('hidden');
         
-        // Pop in the preview
-        anime({
-            targets: '#image-preview-container',
-            translateY: [10, 0],
-            opacity: [0, 1],
-            duration: 400,
-            easing: 'easeOutQuad'
-        });
+        if (typeof anime !== 'undefined') {
+            anime({
+                targets: '#image-preview-container',
+                translateY: [10, 0],
+                opacity: [0, 1],
+                duration: 400,
+                easing: 'easeOutQuad'
+            });
+        }
 
         currentImageBase64 = reader.result.split(',')[1];
         currentImageMimeType = file.type;
@@ -181,14 +199,19 @@ function addMessage(text, isUser = false, imageUrl = null) {
     }
 
     const textSpan = document.createElement('div');
-    textSpan.innerHTML = isUser ? text : marked.parse(text);
+    // Check if marked is available
+    if (typeof marked !== 'undefined') {
+        textSpan.innerHTML = isUser ? text : marked.parse(text);
+    } else {
+        textSpan.innerText = text;
+    }
+    
     messageText.appendChild(textSpan);
     
     messageDiv.appendChild(messageText);
     chatMessagesDiv.appendChild(messageDiv);
     chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
 
-    // Trigger Animation on the new bubble
     animateNewMessage(messageDiv);
 }
 
@@ -202,7 +225,8 @@ async function callGeminiApi(userQuery, imageData) {
 
     const payload = {
         contents: [{ parts: parts }],
-        // tools: [{ "google_search": {} }], // Comment out tools if getting 400 errors to test basic chat first
+        // IMPORTANT: Tools are commented out to prevent 400 Bad Request errors on basic setup
+        // tools: [{ "google_search": {} }], 
         systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
     };
 
@@ -213,11 +237,14 @@ async function callGeminiApi(userQuery, imageData) {
             body: JSON.stringify(payload)
         });
         
-        // DEBUG: If not OK, print the error text to the chat
+        // DEBUG: Detailed Error Reporting
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             const errorMessage = errorData.error?.message || response.statusText;
-            throw new Error(`${response.status}: ${errorMessage}`);
+            console.error("Full Error Data:", errorData);
+            
+            // Return specific error to chat bubble so we can see it
+            return { text: `API Connection Failed (${response.status}): ${errorMessage}` };
         }
 
         const result = await response.json();
@@ -225,30 +252,7 @@ async function callGeminiApi(userQuery, imageData) {
 
     } catch (error) {
         console.error("Gemini API Error details:", error);
-        return { text: `API Error: ${error.message}` };
-    }
-}
-
-    const payload = {
-        contents: [{ parts: parts }],
-        tools: [{ "google_search": {} }], 
-        systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
-    };
-
-    try {
-        const response = await fetch(GEMINI_API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        
-        if (!response.ok) throw new Error(response.status);
-        const result = await response.json();
-        return { text: result.candidates?.[0]?.content?.parts?.[0]?.text || "No response." };
-
-    } catch (error) {
-        console.error(error);
-        return { text: "Connection error." };
+        return { text: `Critical Error: ${error.message}` };
     }
 }
 
@@ -256,7 +260,6 @@ async function handleSendMessage() {
     const userQuery = userInput.value.trim();
     if (userQuery === "" && !currentImageBase64) return;
 
-    // 1. Trigger Button Animation
     animateButton();
 
     const imageToSend = currentImageBase64 ? { mimeType: currentImageMimeType, data: currentImageBase64 } : null;
@@ -290,14 +293,15 @@ function addTypingIndicator() {
     chatMessagesDiv.appendChild(messageDiv);
     chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; 
     
-    // Animate the typing indicator bubbling up
-    anime({
-        targets: messageDiv,
-        scale: [0.8, 1],
-        opacity: [0, 1],
-        duration: 400,
-        easing: 'easeOutBack'
-    });
+    if (typeof anime !== 'undefined') {
+        anime({
+            targets: messageDiv,
+            scale: [0.8, 1],
+            opacity: [0, 1],
+            duration: 400,
+            easing: 'easeOutBack'
+        });
+    }
     
     return messageDiv;
 }
