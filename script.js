@@ -1,6 +1,6 @@
 // --- Global Setup ---
 // IMPORTANT: Use the API Key exactly as provided
-const API_KEY = "AIzaSyCqTHjq48mqB8tXC9G2qsefsrqnQ2JQjVg"; 
+const API_KEY = "AIzaSyDgjL0IZ1PuBAHAu2Y42BVJGmSGVj37dqI"; 
 
 // --- Gemini Configuration ---
 const GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025";
