@@ -3,7 +3,7 @@ const KEY_PART_A = "AIzaSyDjbq3ySNz6";
 const KEY_PART_B = "QdOnjNyPOE4w47xKROs-R6A";
 const API_KEY = KEY_PART_A + KEY_PART_B; 
 
-const GEMINI_MODEL = "gemini-3.0-flash";
+const GEMINI_MODEL = "gemini-2.0-flash";
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${API_KEY}`;
 
 const SYSTEM_INSTRUCTION = `You are the Dermato AI Assistant. Structure advice using clear Markdown. If an image is provided, analyze the skin condition or product professionally. Keep responses concise.`;
