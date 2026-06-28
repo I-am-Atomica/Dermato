@@ -1,6 +1,6 @@
 // --- Global Setup ---
-const KEY_PART_A = "AIzaSyBbKQFccJp";
-const KEY_PART_B = "TZDhF9n362dUcwagnGNvScd8";
+const KEY_PART_A = "AQ.Ab8RN6JPnq4zuZIv2igTcpn";
+const KEY_PART_B = "t47PfvqgNNfsx5tQPYZMI8NHXsQ";
 const API_KEY = KEY_PART_A + KEY_PART_B; 
 
 const GEMINI_MODEL = "gemini-3-flash-preview";
