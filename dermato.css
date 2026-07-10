@@ -3,14 +3,10 @@
 /* 1. VARIABLES & RESET */
 :root {
     --text: #f4f9f1;
-
---background: #050803;
-
---primary: #73b045;
-
---secondary: #296a4e;
-
---accent: #388f88;
+    --background: #050803;
+    --primary: #73b045;
+    --secondary: #296a4e;
+    --accent: #388f88;
 
     --color-dark-bg: var(--background);
     --color-card-bg: rgba(87, 61, 75, 0.55);
