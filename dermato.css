@@ -2,11 +2,15 @@
 
 /* 1. VARIABLES & RESET */
 :root {
-    --text: #f1f0f4;
-    --background: #050406;
-    --primary: #71628d;
-    --secondary: #573d4b;
-    --accent: #6c4b54;
+    --text: #f4f9f1;
+
+--background: #050803;
+
+--primary: #73b045;
+
+--secondary: #296a4e;
+
+--accent: #388f88;
 
     --color-dark-bg: var(--background);
     --color-card-bg: rgba(87, 61, 75, 0.55);
