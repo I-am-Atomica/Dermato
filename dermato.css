@@ -9,7 +9,7 @@
     --accent: #388f88;
 
     --color-dark-bg: var(--background);
-    --color-card-bg: rgba(87, 61, 75, 0.55);
+    --color-card-bg: rgba(41, 106, 78, 0.55);
     --color-ai-bubble: var(--text);
     --color-user-bubble: var(--secondary);
     --color-accent: var(--primary);
@@ -65,7 +65,7 @@ h1 {
     margin-bottom: var(--spacing-md);
     font-size: 2rem;
     text-align: center;
-    text-shadow: 0 0 5px rgba(113, 98, 141, 0.5);
+    text-shadow: 0 0 5px rgba(115, 176, 69, 0.5);
     min-height: 2.5rem; /* Prevent layout shift during decode animation */
 }
 
@@ -162,7 +162,7 @@ h1 {
     letter-spacing: 0.2em;
     opacity: 0; 
     font-family: var(--font-heading); 
-    text-shadow: 0 0 20px rgba(113, 98, 141, 0.9);
+    text-shadow: 0 0 20px rgba(115, 176, 69, 0.9);
 }
 
 .splash-text .letter {
@@ -200,7 +200,7 @@ h1 {
 #user-input:focus {
     outline: none;
     border-color: var(--color-accent);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5), 0 0 8px rgba(113, 98, 141, 0.7); 
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5), 0 0 8px rgba(115, 176, 69, 0.7); 
 }
 
 #send-button {
