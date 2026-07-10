@@ -1,4 +1,4 @@
-/* * Dermato AI Chat Application Stylesheet */
+/* * Dermato AI Chat Application Stylesheet - Centered Glass UI */
 
 /* 1. VARIABLES & RESET */
 :root {
@@ -9,15 +9,13 @@
     --accent: #2e756f;
 
     --color-dark-bg: var(--background);
-    --color-card-bg: rgba(20, 35, 25, 0.65);
-    --color-sidebar-bg: rgba(10, 18, 12, 0.85);
+    --color-card-bg: rgba(20, 35, 25, 0.35); /* Glass transparency */
     --color-ai-bubble: rgba(244, 249, 241, 0.95);
     --color-user-bubble: var(--secondary);
     --color-accent: var(--primary);
     --color-text-light: var(--text);
     --color-text-dark: #121b10;
 
-    /* Clean modern medical typography matching the workspace reference */
     --font-heading: 'Plus Jakarta Sans', 'Inter', sans-serif; 
     --font-body: 'Inter', system-ui, -apple-system, sans-serif; 
 
@@ -43,52 +41,23 @@ body {
     background-position: center; 
     background-attachment: fixed;
     
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
+    /* Flexbox to perfectly center the app-wrapper */
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-/* 2. DASHBOARD WORKSPACE GRID (4-COLUMN LAYOUT) */
+/* 2. MAIN APP WRAPPER */
 #app-wrapper {
     width: 100%;
-    height: 100vh;
-    display: grid;
-    /* Columns: App Nav, Case History, Active Chat, Patient Info */
-    grid-template-columns: 260px 320px 1fr 340px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     position: relative;
     z-index: 10;
 }
 
-/* Navigation Left Sidebar */
-.main-sidebar {
-    background-color: var(--color-sidebar-bg);
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
-    padding: var(--spacing-lg) var(--spacing-md);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-/* Case History List Sidebar */
-.history-sidebar {
-    background-color: rgba(15, 28, 20, 0.4);
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-/* Patient Context Right Panel */
-.info-panel {
-    background-color: rgba(15, 28, 20, 0.4);
-    border-left: 1px solid rgba(255, 255, 255, 0.08);
-    display: flex;
-    flex-direction: column;
-    padding: var(--spacing-md);
-    overflow-y: auto;
-}
-
-/* Main Active Chat Window Component */
-/* Glassmorphism Chat Container */
+/* 3. GLASSMORPHISM CHAT CONTAINER */
 .chat-container {
     width: 90%;
     max-width: 700px;
@@ -97,20 +66,19 @@ body {
     flex-direction: column;
     
     /* The "Glass" Effect */
-    background: rgba(20, 35, 25, 0.35); /* Adjusted alpha for transparency */
-    backdrop-filter: blur(20px);         /* The frosted look */
+    background: var(--color-card-bg);
+    backdrop-filter: blur(20px);         
     -webkit-backdrop-filter: blur(20px);
     
-    border: 1px solid rgba(255, 255, 255, 0.15); /* Subtle edge glow */
+    border: 1px solid rgba(255, 255, 255, 0.15); 
     border-radius: 20px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); /* Depth */
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); 
     
     padding: 24px;
-    margin: 0 auto;
     position: relative;
-    z-index: 10; /* Keeps it above particles */
 }
 
+/* Header */
 .chat-header {
     display: flex;
     align-items: center;
@@ -120,44 +88,18 @@ body {
     margin-bottom: var(--spacing-md);
 }
 
-/* Background Particle Engine */
-#particles-container {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 1; /* Sits behind the chat */
-    overflow: hidden;
-    pointer-events: none;
-}
-
-.particle {
-    position: absolute;
-    width: 4px;
-    height: 4px;
-    background: rgba(115, 176, 69, 0.6); /* Glowy green star color */
-    border-radius: 50%;
-    animation: drift 10s infinite linear;
-    box-shadow: 0 0 6px rgba(115, 176, 69, 0.8);
-}
-
-@keyframes drift {
-    0% { transform: translateY(100vh) translateX(0); opacity: 0; }
-    50% { opacity: 0.8; }
-    100% { transform: translateY(-10vh) translateX(50px); opacity: 0; }
-}
-
 h1 {
     font-family: var(--font-heading);
     color: var(--color-accent);
     font-size: 1.6rem;
     font-weight: 700;
-    text-align: left;
+    text-align: center;
+    width: 100%;
     margin-bottom: 0;
     text-shadow: 0 0 10px rgba(115, 176, 69, 0.3);
-    min-height: auto;
 }
 
-/* 3. CHAT MESSAGES SCROLL AREA */
+/* 4. CHAT MESSAGES SCROLL AREA */
 .chat-messages {
     flex-grow: 1;
     overflow-y: auto;
@@ -174,7 +116,7 @@ h1 {
 }
 .chat-messages::-webkit-scrollbar-track { background: transparent; }
 
-/* 4. MESSAGES PIPELINE */
+/* 5. MESSAGES PIPELINE */
 .message { 
     display: flex; 
     margin-bottom: var(--spacing-md); 
@@ -187,7 +129,7 @@ h1 {
 }
 
 .message-text {
-    max-width: 75%;
+    max-width: 85%;
     padding: var(--spacing-sm) var(--spacing-md);
     border-radius: var(--radius);
     line-height: 1.6;
@@ -225,33 +167,6 @@ h1 {
 .message-text p { margin-bottom: var(--spacing-xs); }
 .message-text p:last-child { margin-bottom: 0; }
 
-/* 5. SPLASH SCREEN */
-#splash-screen {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background-color: var(--color-dark-bg); 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.splash-text {
-    font-size: 5rem;
-    font-weight: 800;
-    color: var(--color-accent);
-    letter-spacing: 0.15em;
-    opacity: 0; 
-    font-family: var(--font-heading); 
-    text-shadow: 0 0 30px rgba(115, 176, 69, 0.6);
-}
-
-.splash-text .letter {
-    display: inline-block;
-    transform-origin: bottom center;
-}
-
 /* 6. INPUT & MEDIA CONTROL BAR */
 .chat-input-container {
     width: 100%;
@@ -281,9 +196,7 @@ h1 {
     font-size: 0.95rem;
     font-family: var(--font-body);
 }
-#user-input:focus {
-    outline: none;
-}
+#user-input:focus { outline: none; }
 
 #send-button {
     padding: var(--spacing-sm) var(--spacing-md);
@@ -297,9 +210,7 @@ h1 {
     font-family: var(--font-body);
     transition: background-color 0.2s;
 }
-#send-button:hover {
-    background-color: #8cd656;
-}
+#send-button:hover { background-color: #8cd656; }
 
 .upload-button {
     color: var(--color-accent);
@@ -371,35 +282,39 @@ h1 {
     40% { transform: scale(1.0); opacity: 1; }
 }
 
-/* 8. BACKGROUND PARTICLES */
+/* 8. BACKGROUND PARTICLES (STARS) */
 #particles-container {
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    z-index: 1;
+    z-index: 1; 
     overflow: hidden;
     pointer-events: none; 
 }
 .particle {
     position: absolute;
+    width: 4px;
+    height: 4px;
+    background: rgba(115, 176, 69, 0.6); 
     border-radius: 50%;
-    background: var(--color-accent); 
-    opacity: 0;
+    animation: drift 10s infinite linear;
+    box-shadow: 0 0 6px rgba(115, 176, 69, 0.8);
+}
+
+@keyframes drift {
+    0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+    50% { opacity: 0.8; }
+    100% { transform: translateY(-10vh) translateX(50px); opacity: 0; }
 }
 
 .hidden { display: none !important; opacity: 0 !important; visibility: hidden !important; }
 
-/* 9. RESPONSIVE RESPONSIVENESS MATRIX */
-@media (max-width: 1200px) {
-    #app-wrapper {
-        grid-template-columns: 80px 260px 1fr; /* Hide context info panel on medium devices */
+/* 9. RESPONSIVE FOR MOBILE */
+@media (max-width: 600px) {
+    .chat-container {
+        width: 100%;
+        height: 100vh;
+        border-radius: 0;
+        border: none;
     }
-    .info-panel { display: none; }
-}
-
-@media (max-width: 900px) {
-    #app-wrapper {
-        grid-template-columns: 1fr; /* Fallback to clean chat view on compact tablets/phones */
-    }
-    .main-sidebar, .history-sidebar, .info-panel { display: none; }
 }
