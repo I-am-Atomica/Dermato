@@ -5,30 +5,32 @@
     --text: #f4f9f1;
     --background: #050803;
     --primary: #73b045;
-    --secondary: #296a4e;
-    --accent: #388f88;
+    --secondary: #1a4231;
+    --accent: #2e756f;
 
     --color-dark-bg: var(--background);
-    --color-card-bg: rgba(41, 106, 78, 0.55);
-    --color-ai-bubble: var(--text);
+    --color-card-bg: rgba(20, 35, 25, 0.65);
+    --color-sidebar-bg: rgba(10, 18, 12, 0.85);
+    --color-ai-bubble: rgba(244, 249, 241, 0.95);
     --color-user-bubble: var(--secondary);
     --color-accent: var(--primary);
     --color-text-light: var(--text);
-    --color-text-dark: var(--background);
+    --color-text-dark: #121b10;
 
-    --font-heading: 'Orbitron', sans-serif; 
-    --font-body: 'Share Tech Mono', monospace; 
+    /* Clean modern medical typography matching the workspace reference */
+    --font-heading: 'Plus Jakarta Sans', 'Inter', sans-serif; 
+    --font-body: 'Inter', system-ui, -apple-system, sans-serif; 
 
-    --spacing-xs: 4px;
-    --spacing-sm: 8px;
-    --spacing-md: 16px;
-    --spacing-lg: 24px;
-    --radius: 12px;
+    --spacing-xs: 6px;
+    --spacing-sm: 12px;
+    --spacing-md: 20px;
+    --spacing-lg: 28px;
+    --radius: 16px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-html, body { width: 100%; min-height: 100vh; margin: 0; }
+html, body { width: 100%; height: 100vh; margin: 0; overflow: hidden; }
 
 body {
     font-family: var(--font-body);
@@ -41,84 +43,129 @@ body {
     background-position: center; 
     background-attachment: fixed;
     
-    backdrop-filter: blur(30px);
-    -webkit-backdrop-filter: blur(30px);
-    
-    display: grid;
-    place-items: center; 
-    overflow-x: hidden;
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
 }
 
+/* 2. DASHBOARD WORKSPACE GRID (4-COLUMN LAYOUT) */
 #app-wrapper {
     width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 0; 
+    height: 100vh;
+    display: grid;
+    /* Columns: App Nav, Case History, Active Chat, Patient Info */
+    grid-template-columns: 260px 320px 1fr 340px;
     position: relative;
-    z-index: 10; /* Ensure app is above particles */
+    z-index: 10;
+}
+
+/* Navigation Left Sidebar */
+.main-sidebar {
+    background-color: var(--color-sidebar-bg);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    padding: var(--spacing-lg) var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Case History List Sidebar */
+.history-sidebar {
+    background-color: rgba(15, 28, 20, 0.4);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Patient Context Right Panel */
+.info-panel {
+    background-color: rgba(15, 28, 20, 0.4);
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-md);
+    overflow-y: auto;
+}
+
+/* Main Active Chat Window Component */
+.chat-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-card-bg);
+    padding: var(--spacing-lg);
+    border: none;
+    border-radius: 0;
+    margin: 0;
+    max-width: none;
+    max-height: none;
+}
+
+.chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: var(--spacing-md);
 }
 
 h1 {
     font-family: var(--font-heading);
     color: var(--color-accent);
-    margin-bottom: var(--spacing-md);
-    font-size: 2rem;
-    text-align: center;
-    text-shadow: 0 0 5px rgba(115, 176, 69, 0.5);
-    min-height: 2.5rem; /* Prevent layout shift during decode animation */
+    font-size: 1.6rem;
+    font-weight: 700;
+    text-align: left;
+    margin-bottom: 0;
+    text-shadow: 0 0 10px rgba(115, 176, 69, 0.3);
+    min-height: auto;
 }
 
-.hidden { display: none !important; opacity: 0 !important; visibility: hidden !important; }
-
-/* 2. CHAT CONTAINER */
-.chat-container {
-    width: 90%;
-    max-width: 700px;
-    height: 90vh; 
-    max-height: 900px;
-    display: flex;
-    flex-direction: column;
-    background-color: var(--color-card-bg);
-    border-radius: var(--radius);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-    padding: var(--spacing-lg);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    margin: 0 auto;
-}
-
+/* 3. CHAT MESSAGES SCROLL AREA */
 .chat-messages {
     flex-grow: 1;
     overflow-y: auto;
     padding: var(--spacing-sm);
     margin-bottom: var(--spacing-md);
-    scrollbar-color: var(--color-accent) var(--color-card-bg);
+    scrollbar-color: var(--color-accent) transparent;
     scrollbar-width: thin;
 }
 
-.chat-messages::-webkit-scrollbar { width: 8px; }
+.chat-messages::-webkit-scrollbar { width: 6px; }
 .chat-messages::-webkit-scrollbar-thumb {
-    background-color: var(--color-accent); 
+    background-color: rgba(115, 176, 69, 0.4); 
     border-radius: 10px;
-    border: 2px solid var(--color-card-bg); 
 }
-.chat-messages::-webkit-scrollbar-track { background: var(--color-card-bg); }
+.chat-messages::-webkit-scrollbar-track { background: transparent; }
 
-/* 3. MESSAGES */
-.message { display: flex; margin-bottom: var(--spacing-sm); }
+/* 4. MESSAGES PIPELINE */
+.message { 
+    display: flex; 
+    margin-bottom: var(--spacing-md); 
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 .message-text {
-    max-width: 90%;
+    max-width: 75%;
     padding: var(--spacing-sm) var(--spacing-md);
     border-radius: var(--radius);
-    line-height: 1.5;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    line-height: 1.6;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .user-message { justify-content: flex-end; }
 .user-message .message-text {
     background-color: var(--color-user-bubble);
     color: var(--color-text-light);
-    border-bottom-right-radius: var(--spacing-xs);
+    border-bottom-right-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     margin-left: auto; 
 }
 
@@ -126,28 +173,28 @@ h1 {
 .ai-message .message-text {
     background-color: var(--color-ai-bubble);
     color: var(--color-text-dark); 
-    border-bottom-left-radius: var(--spacing-xs); 
+    border-bottom-left-radius: 4px; 
 }
 
-/* Markdown */
-.message-text ul, .message-text ol { padding-left: 1.5rem; margin: var(--spacing-sm) 0; }
-.message-text li { margin-bottom: var(--spacing-xs); }
+/* Markdown Inside Messages */
+.message-text ul, .message-text ol { padding-left: 1.5rem; margin: var(--spacing-xs) 0; }
+.message-text li { margin-bottom: 4px; }
 .message-text h2, .message-text h3 {
-    margin-top: var(--spacing-md);
-    margin-bottom: var(--spacing-sm);
-    font-weight: 700;
+    margin-top: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+    font-weight: 600;
+    font-size: 1.1rem;
 }
 .ai-message .message-text h2, .ai-message .message-text h3 { color: var(--color-text-dark); }
 .user-message .message-text h2, .user-message .message-text h3 { color: var(--color-text-light); }
-.message-text p { margin-top: 0; margin-bottom: var(--spacing-sm); }
+.message-text p { margin-bottom: var(--spacing-xs); }
+.message-text p:last-child { margin-bottom: 0; }
 
-/* 4. SPLASH SCREEN */
+/* 5. SPLASH SCREEN */
 #splash-screen {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     background-color: var(--color-dark-bg); 
     display: flex;
     justify-content: center;
@@ -156,13 +203,13 @@ h1 {
 }
 
 .splash-text {
-    font-size: 6rem;
-    font-weight: 900;
+    font-size: 5rem;
+    font-weight: 800;
     color: var(--color-accent);
-    letter-spacing: 0.2em;
+    letter-spacing: 0.15em;
     opacity: 0; 
     font-family: var(--font-heading); 
-    text-shadow: 0 0 20px rgba(115, 176, 69, 0.9);
+    text-shadow: 0 0 30px rgba(115, 176, 69, 0.6);
 }
 
 .splash-text .letter {
@@ -170,37 +217,37 @@ h1 {
     transform-origin: bottom center;
 }
 
-/* 5. INPUT & UPLOAD */
+/* 6. INPUT & MEDIA CONTROL BAR */
 .chat-input-container {
     width: 100%;
     display: flex;
     flex-direction: column;
     position: relative;
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: var(--spacing-md);
 }
 
 .chat-input {
-    border-top: none; 
-    padding-top: var(--spacing-sm);
     display: flex;
     gap: var(--spacing-sm);
     align-items: center;
+    background-color: rgba(0, 0, 0, 0.25);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 #user-input {
     flex-grow: 1;
-    padding: var(--spacing-sm) var(--spacing-md);
-    border: 1px solid var(--color-card-bg);
-    border-radius: var(--radius);
-    background-color: var(--background); 
+    padding: var(--spacing-sm);
+    border: none;
+    background-color: transparent; 
     color: var(--color-text-light);
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-family: var(--font-body);
 }
 #user-input:focus {
     outline: none;
-    border-color: var(--color-accent);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5), 0 0 8px rgba(115, 176, 69, 0.7); 
 }
 
 #send-button {
@@ -208,68 +255,74 @@ h1 {
     background-color: var(--color-accent);
     color: var(--color-dark-bg);
     border: none;
-    border-radius: var(--radius);
+    border-radius: calc(var(--radius) - 4px);
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     font-family: var(--font-body);
+    transition: background-color 0.2s;
+}
+#send-button:hover {
+    background-color: #8cd656;
 }
 
 .upload-button {
     color: var(--color-accent);
     cursor: pointer;
-    padding: 0 var(--spacing-sm);
+    padding: 0 var(--spacing-xs);
     transition: transform 0.2s, color 0.2s;
     display: flex;
     align-items: center;
 }
-.upload-button:hover { color: #fff; transform: scale(1.1); }
+.upload-button:hover { color: #fff; transform: scale(1.05); }
 
-/* Image Preview */
+/* Image Media Previews */
 #image-preview-container {
-    padding: var(--spacing-sm);
-    background-color: rgba(0, 0, 0, 0.2);
+    padding: var(--spacing-xs);
+    background-color: rgba(0, 0, 0, 0.4);
     border-radius: var(--radius);
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
     display: flex;
     width: fit-content;
 }
 .preview-wrapper { position: relative; display: inline-block; }
 #image-preview {
-    height: 60px;
+    height: 56px;
     width: auto;
     border-radius: 8px;
-    border: 2px solid var(--color-accent);
+    border: 1px solid var(--color-accent);
 }
 #remove-image {
     position: absolute;
-    top: -8px; right: -8px;
-    background: #ff6b6b;
+    top: -6px; right: -6px;
+    background: #ff4d4d;
     color: white;
     border: none;
     border-radius: 50%;
-    width: 20px; height: 20px;
+    width: 18px; height: 18px;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
 }
 .message-image {
     max-width: 100%;
-    max-height: 300px;
-    border-radius: var(--radius);
-    margin-top: var(--spacing-sm);
+    max-height: 260px;
+    border-radius: calc(var(--radius) - 4px);
+    margin-top: var(--spacing-xs);
     display: block;
 }
 
-/* 6. TYPING INDICATOR */
+/* 7. TYPING INDICATOR */
 .typing-indicator {
     display: flex;
     align-items: center;
     justify-content: flex-start;
     height: 1.5rem; 
     width: 3rem;
+    padding-left: var(--spacing-xs);
 }
 .typing-indicator span {
-    width: 8px; height: 8px;
+    width: 6px; height: 6px;
     background-color: var(--color-text-dark);
     border-radius: 50%;
     margin: 0 2px;
@@ -283,12 +336,12 @@ h1 {
     40% { transform: scale(1.0); opacity: 1; }
 }
 
-/* 7. AMBIENT PARTICLES */
+/* 8. BACKGROUND PARTICLES */
 #particles-container {
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    z-index: 1; /* Lowest visual layer */
+    z-index: 1;
     overflow: hidden;
     pointer-events: none; 
 }
@@ -299,11 +352,19 @@ h1 {
     opacity: 0;
 }
 
-/* Responsive */
-@media (max-width: 600px) {
-    .chat-container {
-        width: 100%; height: 100vh;
-        max-height: initial; padding: var(--spacing-md);
-        border-radius: 0;
+.hidden { display: none !important; opacity: 0 !important; visibility: hidden !important; }
+
+/* 9. RESPONSIVE RESPONSIVENESS MATRIX */
+@media (max-width: 1200px) {
+    #app-wrapper {
+        grid-template-columns: 80px 260px 1fr; /* Hide context info panel on medium devices */
     }
+    .info-panel { display: none; }
+}
+
+@media (max-width: 900px) {
+    #app-wrapper {
+        grid-template-columns: 1fr; /* Fallback to clean chat view on compact tablets/phones */
+    }
+    .main-sidebar, .history-sidebar, .info-panel { display: none; }
 }
