@@ -1,5 +1,7 @@
 /* * Dermato AI Chat Application Stylesheet */
 
+@import url('https://fonts.googleapis.com/css?family=Tillana:700|Tillana:400');
+
 /* 1. VARIABLES & RESET */
 :root {
     --color-dark-bg: #0D564F; 
@@ -10,8 +12,8 @@
     --color-text-light: #F0FBFC; 
     --color-text-dark: #146B64; 
 
-    --font-heading: 'Orbitron', sans-serif; 
-    --font-body: 'Share Tech Mono', monospace; 
+    --font-heading: 'Tillana', sans-serif; 
+    --font-body: 'Tillana', sans-serif; 
 
     --spacing-xs: 4px;
     --spacing-sm: 8px;
@@ -22,10 +24,13 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+html { font-size: 100%; } /* 16px */
+
 html, body { width: 100%; min-height: 100vh; margin: 0; }
 
 body {
     font-family: var(--font-body);
+    font-weight: 400;
     line-height: 1.6;
     color: var(--color-text-light);
     
@@ -53,15 +58,25 @@ body {
     z-index: 10; /* Ensure app is above particles */
 }
 
-h1 {
+h1, h2, h3, h4, h5 {
     font-family: var(--font-heading);
+    font-weight: 700;
+}
+
+h1 {
     color: var(--color-accent);
     margin-bottom: var(--spacing-md);
-    font-size: 2rem;
+    font-size: 4.210rem; /* 67.36px */
     text-align: center;
     text-shadow: 0 0 5px rgba(102, 255, 216, 0.5);
     min-height: 2.5rem; /* Prevent layout shift during decode animation */
 }
+
+h2 { font-size: 3.158rem; /* 50.56px */ }
+h3 { font-size: 2.369rem; /* 37.92px */ }
+h4 { font-size: 1.777rem; /* 28.48px */ }
+h5 { font-size: 1.333rem; /* 21.28px */ }
+small { font-size: 0.750rem; /* 12px */ }
 
 .hidden { display: none !important; opacity: 0 !important; visibility: hidden !important; }
 
