@@ -88,18 +88,27 @@ body {
 }
 
 /* Main Active Chat Window Component */
+/* Glassmorphism Chat Container */
 .chat-container {
-    width: 100%;
-    height: 100vh;
+    width: 90%;
+    max-width: 700px;
+    height: 85vh;
     display: flex;
     flex-direction: column;
-    background-color: var(--color-card-bg);
-    padding: var(--spacing-lg);
-    border: none;
-    border-radius: 0;
-    margin: 0;
-    max-width: none;
-    max-height: none;
+    
+    /* The "Glass" Effect */
+    background: rgba(20, 35, 25, 0.35); /* Adjusted alpha for transparency */
+    backdrop-filter: blur(20px);         /* The frosted look */
+    -webkit-backdrop-filter: blur(20px);
+    
+    border: 1px solid rgba(255, 255, 255, 0.15); /* Subtle edge glow */
+    border-radius: 20px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); /* Depth */
+    
+    padding: 24px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 10; /* Keeps it above particles */
 }
 
 .chat-header {
@@ -109,6 +118,32 @@ body {
     padding-bottom: var(--spacing-md);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     margin-bottom: var(--spacing-md);
+}
+
+/* Background Particle Engine */
+#particles-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 1; /* Sits behind the chat */
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: rgba(115, 176, 69, 0.6); /* Glowy green star color */
+    border-radius: 50%;
+    animation: drift 10s infinite linear;
+    box-shadow: 0 0 6px rgba(115, 176, 69, 0.8);
+}
+
+@keyframes drift {
+    0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+    50% { opacity: 0.8; }
+    100% { transform: translateY(-10vh) translateX(50px); opacity: 0; }
 }
 
 h1 {
