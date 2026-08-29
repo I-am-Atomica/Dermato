@@ -101,48 +101,51 @@ function startAmbientParticles() {
     const container = document.getElementById('particles-container');
     if(!container) return;
     
-    const particleCount = 40; // High count for ambient dust
+    const particleCount = 80; // Doubled the particle count for a denser field
 
     for (let i = 0; i < particleCount; i++) {
         const p = document.createElement('div');
         p.classList.add('particle');
         
-        // Randomize size slightly for depth (2px to 4px)
-        const size = anime.random(2, 4) + 'px';
+        // Randomize size slightly for depth (2px to 5px)
+        const size = anime.random(2, 5) + 'px';
         p.style.width = size;
         p.style.height = size;
         
         container.appendChild(p);
 
-        // Pass a random start time offset to fill the screen immediately
-        animateParticle(p, anime.random(0, 30000));
+        animateParticle(p);
     }
 }
 
-function animateParticle(el, startOffset = 0) {
-    el.style.top = '100vh';
+function animateParticle(el) {
+    // Anchor to the absolute top of the container to prevent CSS layout quirks
+    el.style.top = '0px'; 
     el.style.left = anime.random(0, 100) + 'vw';
     
     const duration = anime.random(15000, 30000);
     
     const anim = anime({
         targets: el,
-        translateY: [0, -window.innerHeight - 150], // Rise past the top of the screen
+        // Start completely off-screen at the bottom, float past the top
+        translateY: [window.innerHeight + 100, -150], 
         opacity: [
             { value: 0, duration: 1000 },
-            { value: anime.random(0.1, 0.6), duration: 3000 },
-            { value: 0, duration: 2000, delay: duration - 6000 } // Fade out smoothly at top
+            { value: anime.random(0.4, 0.9), duration: 3000 }, // Increased max opacity for visibility
+            { value: 0, duration: 2000, delay: duration - 6000 } 
         ],
         duration: duration,
         easing: 'linear',
         loop: true,
         loopBegin: function() {
-            el.style.left = anime.random(0, 100) + 'vw'; // Randomize X position on every new loop
+            // Randomize horizontal position every time a particle respawns
+            el.style.left = anime.random(0, 100) + 'vw'; 
         }
     });
     
-    // Jump forward in the timeline so they aren't all clustered at the bottom initially
-    if (startOffset > 0) anim.seek(startOffset);
+    // Scrub the animation forward by a completely random amount up to its full duration.
+    // This perfectly scatters them vertically across the entire screen on load.
+    anim.seek(anime.random(0, duration));
     
     particleAnimations.push(anim);
 }
