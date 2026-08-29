@@ -131,15 +131,13 @@ h1 {
     max-height: 900px;
     display: flex;
     flex-direction: column;
-    /* Deepened glass effect */
-    background-color: rgba(17, 100, 102, 0.15); 
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
+    background-color: rgba(255, 255, 255, 0.04); 
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border-radius: var(--radius);
-    /* Dual shadow for 3D depth */
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 203, 154, 0.15);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 203, 154, 0.2);
     padding: var(--spacing-lg);
-    border: 1px solid rgba(255, 203, 154, 0.2);
+    border: 1px solid rgba(255, 203, 154, 0.15);
     margin: 0 auto;
 }
 
