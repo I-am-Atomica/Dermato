@@ -101,51 +101,60 @@ function startAmbientParticles() {
     const container = document.getElementById('particles-container');
     if(!container) return;
     
-    const particleCount = 80; // Doubled the particle count for a denser field
+    const particleCount = 80;
 
+    // First generation: scatter them randomly across the screen so it isn't empty
     for (let i = 0; i < particleCount; i++) {
-        const p = document.createElement('div');
-        p.classList.add('particle');
-        
-        // Randomize size slightly for depth (2px to 5px)
-        const size = anime.random(2, 5) + 'px';
-        p.style.width = size;
-        p.style.height = size;
-        
-        container.appendChild(p);
-
-        animateParticle(p);
+        spawnParticle(true);
     }
 }
 
-function animateParticle(el) {
-    // Anchor to the absolute top of the container to prevent CSS layout quirks
-    el.style.top = '0px'; 
-    el.style.left = anime.random(0, 100) + 'vw';
+function spawnParticle(isInitial = false) {
+    const container = document.getElementById('particles-container');
+    if (!container) return;
+
+    const p = document.createElement('div');
+    p.classList.add('particle');
     
-    const duration = anime.random(15000, 30000);
+    const size = anime.random(2, 5) + 'px';
+    p.style.width = size;
+    p.style.height = size;
+    
+    container.appendChild(p);
+
+    // If initial, spawn randomly anywhere on the Y axis. If a respawn, start at the very bottom.
+    const startY = isInitial ? anime.random(-50, window.innerHeight) : window.innerHeight + 100;
+    const endY = -150;
+    
+    // Calculate distance to keep the rise speed consistent regardless of where it spawned
+    const totalDistance = window.innerHeight + 250;
+    const distanceToTravel = startY - endY;
+    const baseDuration = anime.random(15000, 30000);
+    const duration = (distanceToTravel / totalDistance) * baseDuration;
+
+    p.style.top = '0px'; 
+    p.style.left = anime.random(0, 100) + 'vw';
     
     const anim = anime({
-        targets: el,
-        // Start completely off-screen at the bottom, float past the top
-        translateY: [window.innerHeight + 100, -150], 
+        targets: p,
+        translateY: [startY, endY],
         opacity: [
             { value: 0, duration: 1000 },
-            { value: anime.random(0.4, 0.9), duration: 3000 }, // Increased max opacity for visibility
-            { value: 0, duration: 2000, delay: duration - 6000 } 
+            { value: anime.random(0.4, 0.9), duration: 2000 }, 
+            { value: 0, duration: 2000, delay: Math.max(0, duration - 5000) } // Fade out near the top
         ],
         duration: duration,
         easing: 'linear',
-        loop: true,
-        loopBegin: function() {
-            // Randomize horizontal position every time a particle respawns
-            el.style.left = anime.random(0, 100) + 'vw'; 
+        complete: function() {
+            // The particle reached the top: Destroy it and clean up tracking array
+            p.remove();
+            const index = particleAnimations.indexOf(anim);
+            if (index > -1) particleAnimations.splice(index, 1);
+            
+            // Rebirth a new particle at the bottom
+            spawnParticle(false);
         }
     });
-    
-    // Scrub the animation forward by a completely random amount up to its full duration.
-    // This perfectly scatters them vertically across the entire screen on load.
-    anim.seek(anime.random(0, duration));
     
     particleAnimations.push(anim);
 }
