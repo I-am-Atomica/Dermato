@@ -165,7 +165,7 @@ function spawnParticle(isInitial = false) {
     const duration = (distanceToTravel / totalDistance) * baseDuration;
 
     // Custom Opacity Keyframes
-    if (type === 'flare') {
+   if (type === 'flare') {
         // Strict mapping to vertical percentage via timeline duration
         opacityKeyframes = [
             { value: 0, duration: duration * 0.10 }, // 0% - 10%: Spawn invisible
@@ -175,8 +175,16 @@ function spawnParticle(isInitial = false) {
             { value: 0, duration: duration * 0.30 }  // 70% - 100%: Stay dead
         ];
     } else {
-        // Standard fade logic for everything else
-        const peakOpacity = type === 'fat' ? anime.random(0.2, 0.4) : anime.random(0.4, 0.9);
+        // Dynamic peak opacity based on particle class
+        let peakOpacity;
+        if (type === 'fat') {
+            peakOpacity = anime.random(0.2, 0.4); // Stays dim
+        } else if (type === 'zoomer') {
+            peakOpacity = anime.random(0.8, 1.0); // Forces near-max opacity for visibility
+        } else {
+            peakOpacity = anime.random(0.4, 0.9); // Standard random fade
+        }
+        
         opacityKeyframes = [
             { value: 0, duration: 1000 },
             { value: peakOpacity, duration: 2000 }, 
