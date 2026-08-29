@@ -103,7 +103,6 @@ function startAmbientParticles() {
     
     const particleCount = 80;
 
-    // First generation: scatter them randomly across the screen so it isn't empty
     for (let i = 0; i < particleCount; i++) {
         spawnParticle(true);
     }
@@ -116,47 +115,85 @@ function spawnParticle(isInitial = false) {
     const p = document.createElement('div');
     p.classList.add('particle');
     
-    const size = anime.random(2, 5) + 'px';
-    p.style.width = size;
-    p.style.height = size;
+    // RNG "Loot Drop" Roll (0 to 100)
+    const roll = Math.random() * 100;
+    let type = 'base';
+    
+    if (roll > 65 && roll <= 77) type = 'green';        // 12% Green
+    else if (roll > 77 && roll <= 84) type = 'fat';     // 7% Fat
+    else if (roll > 84 && roll <= 90) type = 'flare';   // 6% Flare
+    else if (roll > 90) type = 'zoomer';                // 10% Zoomer
+    
+    // Default Properties
+    let size = anime.random(2, 4) + 'px';
+    let baseDuration = anime.random(15000, 30000);
+    let opacityKeyframes = [];
+    
+    // Apply Class Modifications
+    if (type === 'green') {
+        p.classList.add('particle-green');
+    } else if (type === 'fat') {
+        size = anime.random(6, 12) + 'px';
+        baseDuration = anime.random(40000, 60000); // Sluggish
+        p.style.zIndex = '0'; // Push to back
+        p.style.filter = 'blur(3px)'; // Out of focus
+    } else if (type === 'zoomer') {
+        p.classList.add('particle-zoomer');
+        baseDuration = anime.random(1000, 3000); // Mach 5
+    } else if (type === 'flare') {
+        p.classList.add('particle-flare');
+        size = anime.random(3, 6) + 'px';
+    }
+
+    // Apply dimensions (Skipped for zoomers to preserve CSS pill shape)
+    if (type !== 'zoomer') {
+        p.style.width = size;
+        p.style.height = size;
+    }
     
     container.appendChild(p);
 
-    // If initial, spawn randomly anywhere on the Y axis. If a respawn, start at the very bottom.
     const startY = isInitial ? anime.random(-50, window.innerHeight) : window.innerHeight + 100;
     const endY = -150;
     
-    // Calculate distance to keep the rise speed consistent regardless of where it spawned
     const totalDistance = window.innerHeight + 250;
     const distanceToTravel = startY - endY;
-    const baseDuration = anime.random(15000, 30000);
     const duration = (distanceToTravel / totalDistance) * baseDuration;
+
+    // Custom Opacity Keyframes
+    if (type === 'flare') {
+        // Strict mapping to vertical percentage via timeline duration
+        opacityKeyframes = [
+            { value: 0, duration: duration * 0.10 }, // 0% - 10%: Spawn invisible
+            { value: 1, duration: duration * 0.25 }, // 10% - 35%: Peak intensity 
+            { value: 0.6, duration: duration * 0.05 }, // 35% - 40%: Begin fade
+            { value: 0, duration: duration * 0.30 }, // 40% - 70%: Fade to zero
+            { value: 0, duration: duration * 0.30 }  // 70% - 100%: Stay dead
+        ];
+    } else {
+        // Standard fade logic for everything else
+        const peakOpacity = type === 'fat' ? anime.random(0.2, 0.4) : anime.random(0.4, 0.9);
+        opacityKeyframes = [
+            { value: 0, duration: 1000 },
+            { value: peakOpacity, duration: 2000 }, 
+            { value: 0, duration: 2000, delay: Math.max(0, duration - 5000) } 
+        ];
+    }
 
     p.style.top = '0px'; 
     p.style.left = anime.random(0, 100) + 'vw';
     
-    const anim = anime({
+    anime({
         targets: p,
         translateY: [startY, endY],
-        opacity: [
-            { value: 0, duration: 1000 },
-            { value: anime.random(0.4, 0.9), duration: 2000 }, 
-            { value: 0, duration: 2000, delay: Math.max(0, duration - 5000) } // Fade out near the top
-        ],
+        opacity: opacityKeyframes,
         duration: duration,
         easing: 'linear',
         complete: function() {
-            // The particle reached the top: Destroy it and clean up tracking array
             p.remove();
-            const index = particleAnimations.indexOf(anim);
-            if (index > -1) particleAnimations.splice(index, 1);
-            
-            // Rebirth a new particle at the bottom
             spawnParticle(false);
         }
     });
-    
-    particleAnimations.push(anim);
 }
 
 function triggerParticleWarp() {
