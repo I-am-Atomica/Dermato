@@ -153,7 +153,11 @@ function spawnParticle(isInitial = false) {
     
     container.appendChild(p);
 
-    const startY = isInitial ? anime.random(-50, window.innerHeight) : window.innerHeight + 100;
+    // FIX: Only base particles scatter on initial load. All specials start at the bottom.
+    const startY = (isInitial && type === 'base') 
+        ? anime.random(-50, window.innerHeight) 
+        : window.innerHeight + 100;
+        
     const endY = -150;
     
     const totalDistance = window.innerHeight + 250;
@@ -196,23 +200,6 @@ function spawnParticle(isInitial = false) {
     });
 }
 
-function triggerParticleWarp() {
-    const speedController = { speed: 1 };
-    
-    anime({
-        targets: speedController,
-        speed: 15, // Warp speed multiplier
-        duration: 800,
-        direction: 'alternate',
-        easing: 'easeInOutQuad',
-        update: function() {
-            // Apply the dynamic speed multiplier to every running particle
-            particleAnimations.forEach(anim => {
-                anim.speed = speedController.speed;
-            });
-        }
-    });
-}
 
 function animateTitle() {
     const title = document.querySelector('h1');
