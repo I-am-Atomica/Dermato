@@ -625,15 +625,14 @@ audio::-webkit-media-controls-volume-slider {
 }
 
 .particle {
-
     position: absolute;
-
+    width: 3px;
+    height: 3px;
     border-radius: 50%;
-
-    background: var(--color-accent); 
-
+    background-color: var(--color-accent); 
+    box-shadow: 0 0 6px var(--color-accent);
+    filter: blur(1px);
     opacity: 0;
-
 }
 
 
