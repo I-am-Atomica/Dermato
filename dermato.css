@@ -215,17 +215,16 @@ h1 {
 .message { display: flex; margin-bottom: var(--spacing-sm); }
 
 .message-text {
-
     max-width: 90%;
-
     padding: var(--spacing-sm) var(--spacing-md);
-
     border-radius: var(--radius);
-
     line-height: 1.5;
-
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out; 
+}
+.message-text:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), 0 0 8px rgba(115, 176, 69, 0.15);
 }
 
 
@@ -409,28 +408,26 @@ h1 {
 
 
 #send-button {
-
     padding: var(--spacing-sm) var(--spacing-md);
-
     background-color: var(--color-accent);
-
     color: var(--color-dark-bg);
-
     border: none;
-
     border-radius: var(--radius);
-
     cursor: pointer;
-
     font-size: 1rem;
-
     font-weight: 600;
-
     font-family: var(--font-body);
-
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+#send-button:hover {
+    background-color: #85c950; /* A slightly brighter pop of your primary green */
+    transform: scale(1.05);
+    box-shadow: 0 0 12px rgba(115, 176, 69, 0.6);
 }
 
-
+#send-button:active {
+    transform: scale(0.95);
+}
 
 .upload-button {
 
