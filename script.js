@@ -16,8 +16,6 @@ const fileInput = document.getElementById('file-input');
 const imagePreviewContainer = document.getElementById('image-preview-container');
 const imagePreview = document.getElementById('image-preview');
 const removeImageBtn = document.getElementById('remove-image');
-
-// --- New Audio UI Elements ---
 const micButton = document.getElementById('mic-button');
 const audioPreviewContainer = document.getElementById('audio-preview-container');
 const audioPreview = document.getElementById('audio-preview');
@@ -28,7 +26,7 @@ const recordingTimeDisplay = document.getElementById('recording-time');
 // --- State ---
 let currentImageBase64 = null;
 let currentImageMimeType = null;
-
+let isInitializing = false;
 let currentAudioBase64 = null;
 let currentAudioMimeType = null;
 let mediaRecorder = null;
@@ -249,10 +247,14 @@ function clearImageSelection() {
 }
 
 async function toggleRecording() {
+    if (isInitializing) return;
+    
     if (isRecording) {
         stopRecording();
     } else {
+        isInitializing = true;
         await startRecording();
+        isInitializing = false;
     }
 }
 
@@ -278,6 +280,9 @@ async function startRecording() {
         
         recordingSeconds = 0;
         recordingTimeDisplay.innerText = "0:00";
+        
+        // Clear any rogue intervals before starting a new one
+        clearInterval(recordingTimer);
         recordingTimer = setInterval(() => {
             recordingSeconds++;
             const mins = Math.floor(recordingSeconds / 60);
@@ -375,8 +380,15 @@ async function callGeminiApi(userQuery, imageData, audioData) {
         parts.push({ inlineData: { mimeType: audioData.mimeType, data: audioData.data } });
     }
 
-    if (parts.length === 1 && (imageData || audioData)) {
-         parts.push({ text: "Analyze this." });
+    // Context-specific fallback prompts
+   if (!userQuery) {
+        if (imageData && audioData) {
+            parts.push({ text: "Listen to the voice note regarding this skin condition image." });
+        } else if (imageData) {
+            parts.push({ text: "Analyze this image." });
+        } else if (audioData) {
+            parts.push({ text: "Listen to this voice note and respond accordingly." });
+        }
     }
 
     const payload = {
