@@ -132,7 +132,7 @@ h1 {
     display: flex;
     flex-direction: column;
     /* Deepened glass effect */
-    background-color: rgba(17, 100, 102, 0.45); 
+    background-color: rgba(17, 100, 102, 0.15); 
     backdrop-filter: blur(25px);
     -webkit-backdrop-filter: blur(25px);
     border-radius: var(--radius);
