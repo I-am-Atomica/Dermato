@@ -484,26 +484,83 @@ h1 {
 
 }
 
-#remove-image {
-
+/* Update existing #remove-image to shared class */
+.remove-btn {
     position: absolute;
-
     top: -8px; right: -8px;
-
     background: #ff6b6b;
-
     color: white;
-
     border: none;
-
     border-radius: 50%;
-
     width: 20px; height: 20px;
-
     cursor: pointer;
-
     display: flex; align-items: center; justify-content: center;
+    z-index: 2;
+}
 
+/* Share styles for upload and mic buttons */
+.upload-button, .icon-button {
+    color: var(--color-accent);
+    cursor: pointer;
+    padding: 0 var(--spacing-sm);
+    transition: transform 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    background: none;
+    border: none;
+}
+.icon-button:hover { color: #fff; transform: scale(1.1); }
+
+/* Microphone Recording State Animation */
+.recording {
+    color: #ff4757 !important;
+    animation: pulse-record 1.5s infinite;
+}
+
+@keyframes pulse-record {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.4); border-radius: 50%; }
+    70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(255, 71, 87, 0); border-radius: 50%; }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); border-radius: 50%; }
+}
+
+/* Audio Previews & Chat Bubbles */
+#audio-preview-container {
+    padding: var(--spacing-sm);
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius);
+    margin-bottom: var(--spacing-xs);
+    display: flex;
+    width: fit-content;
+}
+
+#recording-indicator {
+    color: #ff4757;
+    font-weight: 700;
+    font-family: var(--font-body);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+}
+
+.recording-dot {
+    width: 10px; height: 10px;
+    background-color: #ff4757;
+    border-radius: 50%;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+audio {
+    height: 40px;
+    border-radius: var(--radius);
+    outline: none;
+}
+
+.message-audio {
+    margin-top: var(--spacing-sm);
+    max-width: 100%;
 }
 
 .message-image {
