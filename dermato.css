@@ -627,19 +627,22 @@ audio::-webkit-media-controls-volume-slider {
 }
 
 /* Striking Green */
-.particle-green {
-    background-color: #00FF66;
-    box-shadow: 0 0 8px #00FF66;
+.particle-zoomer {
+    width: 3px !important; /* Increased from 2px */
+    height: 80px !important; /* Doubled trail length */
+    border-radius: 3px;
+    background: linear-gradient(to bottom, var(--color-accent) 0%, transparent 100%);
+    box-shadow: none; 
+    filter: blur(0px); 
 }
 
-/* Mach 5 Zoomer */
-.particle-zoomer {
-    width: 2px !important; 
-    height: 40px !important;
-    border-radius: 2px;
-    background: linear-gradient(to bottom, var(--color-accent) 0%, transparent 100%);
-    box-shadow: none; /* Stripped shadow for max performance at high speed */
-    filter: blur(0px); /* Crisp motion */
+/* Cyan Flare */
+.particle-flare {
+    background-color: #FFFFFF; /* Hot white core */
+    /* Tripled the shadow stacking for a blinding, wide glow */
+    box-shadow: 0 0 8px 2px #FFFFFF, 0 0 25px 6px #00FFFF, 0 0 50px 10px #00FFFF;
+    filter: blur(2px);
+    z-index: 2; 
 }
 
 /* Cyan Flare */
