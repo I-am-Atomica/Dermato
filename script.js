@@ -34,6 +34,7 @@ let audioChunks = [];
 let isRecording = false;
 let recordingTimer = null;
 let recordingSeconds = 0;
+const particleAnimations = []; // Tracks particles for the warp effect
 
 // --- 1. STARTUP SEQUENCE ---
 window.onload = function() {
@@ -95,50 +96,72 @@ function startMainAppFlow() {
     addMessage("Sup homie, I am Mato... Dermato. Send me a photo, record a voice note, or ask a question!", false);
 }
 
-// --- 2. AMBIENT EFFECTS ---
+// --- 2. AMBIENT EFFECTS (VFX) ---
 function startAmbientParticles() {
     const container = document.getElementById('particles-container');
     if(!container) return;
     
-    const particleCount = 15;
+    const particleCount = 40; // High count for ambient dust
 
     for (let i = 0; i < particleCount; i++) {
         const p = document.createElement('div');
         p.classList.add('particle');
+        
+        // Randomize size slightly for depth (2px to 4px)
+        const size = anime.random(2, 4) + 'px';
+        p.style.width = size;
+        p.style.height = size;
+        
         container.appendChild(p);
 
-        anime.set(p, {
-            x: anime.random(0, window.innerWidth),
-            y: anime.random(0, window.innerHeight),
-            scale: anime.random(0.2, 1.5),
-            opacity: anime.random(0.1, 0.4)
-        });
-
-        animateParticle(p);
+        // Pass a random start time offset to fill the screen immediately
+        animateParticle(p, anime.random(0, 30000));
     }
 }
 
-function animateParticle(el) {
-    anime({
+function animateParticle(el, startOffset = 0) {
+    el.style.top = '100vh';
+    el.style.left = anime.random(0, 100) + 'vw';
+    
+    const duration = anime.random(15000, 30000);
+    
+    const anim = anime({
         targets: el,
-        y: [{ value: '-=100', duration: anime.random(3000, 8000) }],
-        x: [
-             { value: '+=50', duration: anime.random(2000, 5000), easing: 'easeInOutSine' },
-             { value: '-=50', duration: anime.random(2000, 5000), easing: 'easeInOutSine' }
-        ],
+        translateY: [0, -window.innerHeight - 150], // Rise past the top of the screen
         opacity: [
-            { value: 0, duration: 1000, easing: 'linear' },
-            { value: anime.random(0.1, 0.4), duration: 1000, easing: 'linear' }
+            { value: 0, duration: 1000 },
+            { value: anime.random(0.1, 0.6), duration: 3000 },
+            { value: 0, duration: 2000, delay: duration - 6000 } // Fade out smoothly at top
         ],
-        scale: [
-             { value: 0, duration: 1000, easing: 'easeOutSine' },
-             { value: anime.random(0.2, 1.5), duration: 1000, easing: 'easeInSine' }
-        ],
-        delay: anime.random(0, 5000),
-        duration: anime.random(5000, 10000),
+        duration: duration,
+        easing: 'linear',
         loop: true,
+        loopBegin: function() {
+            el.style.left = anime.random(0, 100) + 'vw'; // Randomize X position on every new loop
+        }
+    });
+    
+    // Jump forward in the timeline so they aren't all clustered at the bottom initially
+    if (startOffset > 0) anim.seek(startOffset);
+    
+    particleAnimations.push(anim);
+}
+
+function triggerParticleWarp() {
+    const speedController = { speed: 1 };
+    
+    anime({
+        targets: speedController,
+        speed: 15, // Warp speed multiplier
+        duration: 800,
         direction: 'alternate',
-        easing: 'linear'
+        easing: 'easeInOutQuad',
+        update: function() {
+            // Apply the dynamic speed multiplier to every running particle
+            particleAnimations.forEach(anim => {
+                anim.speed = speedController.speed;
+            });
+        }
     });
 }
 
@@ -381,7 +404,7 @@ async function callGeminiApi(userQuery, imageData, audioData) {
     }
 
     // Context-specific fallback prompts
-   if (!userQuery) {
+    if (!userQuery) {
         if (imageData && audioData) {
             parts.push({ text: "Listen to the voice note regarding this skin condition image." });
         } else if (imageData) {
@@ -423,6 +446,7 @@ async function handleSendMessage() {
     if (userQuery === "" && !currentImageBase64 && !currentAudioBase64) return;
 
     animateButton();
+    triggerParticleWarp(); // Triggers the particle speed boost
 
     const imageToSend = currentImageBase64 ? { mimeType: currentImageMimeType, data: currentImageBase64 } : null;
     const audioToSend = currentAudioBase64 ? { mimeType: currentAudioMimeType, data: currentAudioBase64 } : null;
