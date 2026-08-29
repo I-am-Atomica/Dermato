@@ -6,7 +6,7 @@ const API_KEY = KEY_PART_A + KEY_PART_B;
 const GEMINI_MODEL = "gemini-3-flash-preview";
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${API_KEY}`;
 
-const SYSTEM_INSTRUCTION = `You are the Dermato AI Assistant. Structure advice using clear Markdown. If an image is provided, analyze the skin condition or product professionally. Keep responses concise.`;
+const SYSTEM_INSTRUCTION = `You are the Dermato AI Assistant. Structure advice using clear Markdown. If an image or audio is provided, analyze the condition or prompt professionally. Keep responses concise.`;
 
 // --- UI Elements ---
 const chatMessagesDiv = document.getElementById('chat-messages');
@@ -17,9 +17,25 @@ const imagePreviewContainer = document.getElementById('image-preview-container')
 const imagePreview = document.getElementById('image-preview');
 const removeImageBtn = document.getElementById('remove-image');
 
-// State
+// --- New Audio UI Elements ---
+const micButton = document.getElementById('mic-button');
+const audioPreviewContainer = document.getElementById('audio-preview-container');
+const audioPreview = document.getElementById('audio-preview');
+const removeAudioBtn = document.getElementById('remove-audio');
+const recordingIndicator = document.getElementById('recording-indicator');
+const recordingTimeDisplay = document.getElementById('recording-time');
+
+// --- State ---
 let currentImageBase64 = null;
 let currentImageMimeType = null;
+
+let currentAudioBase64 = null;
+let currentAudioMimeType = null;
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+let recordingTimer = null;
+let recordingSeconds = 0;
 
 // --- 1. STARTUP SEQUENCE ---
 window.onload = function() {
@@ -32,12 +48,10 @@ window.onload = function() {
     const mainSplashScreen = document.getElementById('splash-screen');
     const splashText = mainSplashScreen.querySelector('.splash-text');
     
-    // Prepare Letters
     splashText.innerHTML = splashText.textContent.replace(/\S/g, "<span class='letter'>$&</span>");
     splashText.style.opacity = '1';
     mainSplashScreen.classList.remove('hidden');
 
-    // Splash Timeline
     const tl = anime.timeline({ easing: 'easeOutExpo', duration: 1000 });
 
     tl.add({
@@ -49,7 +63,7 @@ window.onload = function() {
         duration: 1200,
         delay: anime.stagger(100)
     })
-    .add({ duration: 1000 }) // Wait
+    .add({ duration: 1000 })
     .add({
         targets: '.splash-text',
         opacity: 0,
@@ -68,7 +82,6 @@ function startMainAppFlow() {
     if(chatContainer) {
         chatContainer.classList.remove('hidden');
         
-        // Pop In Animation
         anime({
             targets: '.chat-container',
             scale: [0.9, 1],
@@ -78,29 +91,24 @@ function startMainAppFlow() {
         });
     }
 
-    // Start Ambient Effects
     startAmbientParticles();
     animateTitle();
-
     setupEventListeners();
-    addMessage("Sup homie, I am Mato... Dermato. Send me a photo or ask a question!", false);
+    addMessage("Sup homie, I am Mato... Dermato. Send me a photo, record a voice note, or ask a question!", false);
 }
 
 // --- 2. AMBIENT EFFECTS ---
-
-// A. Floating "Serum" Bubbles
 function startAmbientParticles() {
     const container = document.getElementById('particles-container');
     if(!container) return;
     
-    const particleCount = 15; // Number of bubbles
+    const particleCount = 15;
 
     for (let i = 0; i < particleCount; i++) {
         const p = document.createElement('div');
         p.classList.add('particle');
         container.appendChild(p);
 
-        // Random Initial State
         anime.set(p, {
             x: anime.random(0, window.innerWidth),
             y: anime.random(0, window.innerHeight),
@@ -136,7 +144,6 @@ function animateParticle(el) {
     });
 }
 
-// B. Decoding Title Effect
 function animateTitle() {
     const title = document.querySelector('h1');
     const originalText = "Dermato";
@@ -146,17 +153,13 @@ function animateTitle() {
         targets: { val: 0 },
         val: 100,
         round: 1,
-        duration: 4000, // <--- CHANGE THIS NUMBER (e.g., 4000 = 4 seconds)
+        duration: 4000,
         easing: 'easeOutExpo',
         update: function(anim) {
-            // This calculates how many letters should be revealed based on the % progress
             const iterations = (anim.progress / 100) * originalText.length;
-            
             title.innerText = originalText.split("")
                 .map((letter, index) => {
-                    if (index < iterations) {
-                        return originalText[index];
-                    }
+                    if (index < iterations) return originalText[index];
                     return letters[Math.floor(Math.random() * letters.length)];
                 })
                 .join("");
@@ -165,7 +168,6 @@ function animateTitle() {
 }
 
 // --- 3. INTERACTION LOGIC ---
-
 function setupEventListeners() {
     if(sendButton) sendButton.addEventListener('click', handleSendMessage);
     if(userInput) {
@@ -175,6 +177,10 @@ function setupEventListeners() {
     }
     if(fileInput) fileInput.addEventListener('change', handleFileSelect);
     if(removeImageBtn) removeImageBtn.addEventListener('click', clearImageSelection);
+    
+    // Audio Listeners
+    if(micButton) micButton.addEventListener('click', toggleRecording);
+    if(removeAudioBtn) removeAudioBtn.addEventListener('click', clearAudioSelection);
 }
 
 function animateButton() {
@@ -187,7 +193,7 @@ function animateButton() {
 }
 
 function animateNewMessage(element) {
-    if (element.querySelector('img')) {
+    if (element.querySelector('img') || element.querySelector('audio')) {
         anime({
             targets: element,
             opacity: [0, 1],
@@ -206,8 +212,7 @@ function animateNewMessage(element) {
     }
 }
 
-// --- 4. IMAGE & API LOGIC ---
-
+// --- 4. MEDIA RECORDING & SELECTION LOGIC ---
 function handleFileSelect(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -243,7 +248,86 @@ function clearImageSelection() {
     imagePreviewContainer.classList.add('hidden');
 }
 
-function addMessage(text, isUser = false, imageUrl = null) {
+async function toggleRecording() {
+    if (isRecording) {
+        stopRecording();
+    } else {
+        await startRecording();
+    }
+}
+
+async function startRecording() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) audioChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = processAudio;
+        mediaRecorder.start();
+        isRecording = true;
+
+        micButton.classList.add('recording');
+        audioPreviewContainer.classList.remove('hidden');
+        recordingIndicator.classList.remove('hidden');
+        audioPreview.classList.add('hidden');
+        removeAudioBtn.classList.add('hidden');
+        
+        recordingSeconds = 0;
+        recordingTimeDisplay.innerText = "0:00";
+        recordingTimer = setInterval(() => {
+            recordingSeconds++;
+            const mins = Math.floor(recordingSeconds / 60);
+            const secs = (recordingSeconds % 60).toString().padStart(2, '0');
+            recordingTimeDisplay.innerText = `${mins}:${secs}`;
+        }, 1000);
+
+    } catch (err) {
+        console.error("Microphone access denied:", err);
+        alert("Please allow microphone access to record voice notes.");
+    }
+}
+
+function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+    }
+    
+    isRecording = false;
+    clearInterval(recordingTimer);
+    micButton.classList.remove('recording');
+    recordingIndicator.classList.add('hidden');
+}
+
+function processAudio() {
+    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+    const audioUrl = URL.createObjectURL(audioBlob);
+    
+    audioPreview.src = audioUrl;
+    audioPreview.classList.remove('hidden');
+    removeAudioBtn.classList.remove('hidden');
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+        currentAudioBase64 = reader.result.split(',')[1];
+        currentAudioMimeType = 'audio/webm';
+    };
+    reader.readAsDataURL(audioBlob);
+}
+
+function clearAudioSelection() {
+    currentAudioBase64 = null;
+    currentAudioMimeType = null;
+    audioPreview.src = "";
+    audioPreviewContainer.classList.add('hidden');
+}
+
+// --- 5. CHAT & API LOGIC ---
+function addMessage(text, isUser = false, imageUrl = null, audioUrl = null) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
     
@@ -256,11 +340,19 @@ function addMessage(text, isUser = false, imageUrl = null) {
         img.className = 'message-image';
         messageText.appendChild(img);
     }
+    
+    if (audioUrl) {
+        const audio = document.createElement('audio');
+        audio.src = audioUrl;
+        audio.controls = true;
+        audio.className = 'message-audio';
+        messageText.appendChild(audio);
+    }
 
     const textSpan = document.createElement('div');
-    if (typeof marked !== 'undefined') {
+    if (typeof marked !== 'undefined' && text) {
         textSpan.innerHTML = isUser ? text : marked.parse(text);
-    } else {
+    } else if (text) {
         textSpan.innerText = text;
     }
     
@@ -272,17 +364,23 @@ function addMessage(text, isUser = false, imageUrl = null) {
     animateNewMessage(messageDiv);
 }
 
-async function callGeminiApi(userQuery, imageData) {
-    const parts = [{ text: userQuery }];
+async function callGeminiApi(userQuery, imageData, audioData) {
+    const parts = [];
+    if (userQuery) parts.push({ text: userQuery });
+    
     if (imageData) {
-        parts.push({
-            inlineData: { mimeType: imageData.mimeType, data: imageData.data }
-        });
+        parts.push({ inlineData: { mimeType: imageData.mimeType, data: imageData.data } });
+    }
+    if (audioData) {
+        parts.push({ inlineData: { mimeType: audioData.mimeType, data: audioData.data } });
+    }
+
+    if (parts.length === 1 && (imageData || audioData)) {
+         parts.push({ text: "Analyze this." });
     }
 
     const payload = {
         contents: [{ parts: parts }],
-        // tools: [{ "google_search": {} }], 
         systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
     };
 
@@ -310,23 +408,27 @@ async function callGeminiApi(userQuery, imageData) {
 
 async function handleSendMessage() {
     const userQuery = userInput.value.trim();
-    if (userQuery === "" && !currentImageBase64) return;
+    if (userQuery === "" && !currentImageBase64 && !currentAudioBase64) return;
 
     animateButton();
 
     const imageToSend = currentImageBase64 ? { mimeType: currentImageMimeType, data: currentImageBase64 } : null;
-    const previewUrl = imagePreview.src;
+    const audioToSend = currentAudioBase64 ? { mimeType: currentAudioMimeType, data: currentAudioBase64 } : null;
+    
+    const imagePreviewUrl = imageToSend ? imagePreview.src : null;
+    const audioPreviewUrl = audioToSend ? audioPreview.src : null;
 
-    addMessage(userQuery, true, imageToSend ? previewUrl : null);
+    addMessage(userQuery, true, imagePreviewUrl, audioPreviewUrl);
 
     userInput.value = '';
     clearImageSelection();
+    clearAudioSelection();
     sendButton.disabled = true;
 
     const typingIndicator = addTypingIndicator();
 
     try {
-        const responseData = await callGeminiApi(userQuery || "Analyze this image", imageToSend);
+        const responseData = await callGeminiApi(userQuery, imageToSend, audioToSend);
         typingIndicator.remove();
         addMessage(responseData.text, false);
     } catch (error) {
