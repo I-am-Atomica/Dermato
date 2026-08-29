@@ -176,11 +176,6 @@ h1 {
     padding: var(--spacing-sm);
 
     margin-bottom: var(--spacing-md);
-
-    scrollbar-color: var(--color-accent) var(--color-card-bg);
-
-    scrollbar-width: thin;
-
 }
 
 
