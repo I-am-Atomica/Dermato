@@ -7,13 +7,13 @@
 /* 1. VARIABLES & RESET */
 :root {
     --text: #D1E8E2;
-    --background: #2C3531;
+    --background: #1E353B;
     --primary: #FFCB9A;
     --secondary: #116466;
     --accent: #D9B08C;
 
     --color-dark-bg: var(--background);
-    --color-card-bg: rgba(17, 100, 102, 0.35); /* Deep Teal Glass */
+    --color-card-bg: rgba(17, 100, 102, 0.35);
     --color-ai-bubble: var(--text);
     --color-user-bubble: var(--secondary);
     --color-accent: var(--primary);
@@ -609,30 +609,45 @@ audio::-webkit-media-controls-volume-slider {
 /* 7. AMBIENT PARTICLES */
 
 #particles-container {
-
     position: fixed;
-
     top: 0; left: 0;
-
     width: 100%; height: 100%;
-
-    z-index: 1; /* Lowest visual layer */
-
+    z-index: 1; 
     overflow: hidden;
-
     pointer-events: none; 
-
 }
 
 .particle {
     position: absolute;
-    width: 3px;
-    height: 3px;
     border-radius: 50%;
-    background-color: var(--color-accent); 
+    background: var(--color-accent); 
     box-shadow: 0 0 6px var(--color-accent);
     filter: blur(1px);
     opacity: 0;
+}
+
+/* Striking Green */
+.particle-green {
+    background-color: #00FF66;
+    box-shadow: 0 0 8px #00FF66;
+}
+
+/* Mach 5 Zoomer */
+.particle-zoomer {
+    width: 2px !important; 
+    height: 40px !important;
+    border-radius: 2px;
+    background: linear-gradient(to bottom, var(--color-accent) 0%, transparent 100%);
+    box-shadow: none; /* Stripped shadow for max performance at high speed */
+    filter: blur(0px); /* Crisp motion */
+}
+
+/* Cyan Flare */
+.particle-flare {
+    background-color: #E0FFFF;
+    box-shadow: 0 0 15px 4px #00FFFF, 0 0 30px 2px #00FFFF;
+    filter: blur(2px);
+    z-index: 2; /* Forces flares in front of other particles */
 }
 
 
