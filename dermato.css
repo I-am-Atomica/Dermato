@@ -194,19 +194,21 @@ h1 {
 
 
 
-.chat-messages::-webkit-scrollbar { width: 8px; }
+.chat-messages::-webkit-scrollbar { width: 4px; }
 
 .chat-messages::-webkit-scrollbar-thumb {
-
-    background-color: var(--color-accent); 
-
+    background-color: rgba(115, 176, 69, 0.4); 
     border-radius: 10px;
-
-    border: 2px solid var(--color-card-bg); 
-
+    transition: background-color 0.2s ease;
 }
 
-.chat-messages::-webkit-scrollbar-track { background: var(--color-card-bg); }
+.chat-messages::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-accent); 
+}
+
+.chat-messages::-webkit-scrollbar-track { 
+    background: transparent; 
+}
 
 
 
@@ -553,6 +555,27 @@ audio {
     height: 40px;
     border-radius: var(--radius);
     outline: none;
+    /* Adding a subtle shadow to the player itself */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* WebKit Shadow DOM Overrides for Audio Player */
+audio::-webkit-media-controls-panel {
+    background-color: var(--color-user-bubble); /* Deep green background */
+}
+
+audio::-webkit-media-controls-current-time-display,
+audio::-webkit-media-controls-time-remaining-display {
+    color: var(--color-text-light); /* Light text for timestamps */
+    text-shadow: none;
+}
+
+/* Invert default black icons to white to contrast with the dark green background */
+audio::-webkit-media-controls-play-button,
+audio::-webkit-media-controls-mute-button,
+audio::-webkit-media-controls-timeline,
+audio::-webkit-media-controls-volume-slider {
+    filter: invert(1) brightness(1.2);
 }
 
 .message-audio {
