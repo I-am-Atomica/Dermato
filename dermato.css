@@ -147,31 +147,22 @@ h1 {
 /* 2. CHAT CONTAINER */
 
 .chat-container {
-
     width: 90%;
-
     max-width: 700px;
-
     height: 90vh; 
-
     max-height: 900px;
-
     display: flex;
-
     flex-direction: column;
-
-    background-color: var(--color-card-bg);
-
+    /* Deepened glass effect */
+    background-color: rgba(15, 25, 15, 0.45); 
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
     border-radius: var(--radius);
-
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-
+    /* Dual shadow for 3D depth */
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     padding: var(--spacing-lg);
-
-    border: 1px solid rgba(255, 255, 255, 0.15);
-
+    border: 1px solid rgba(115, 176, 69, 0.2);
     margin: 0 auto;
-
 }
 
 
@@ -234,15 +225,12 @@ h1 {
 .user-message { justify-content: flex-end; }
 
 .user-message .message-text {
-
     background-color: var(--color-user-bubble);
-
     color: var(--color-text-light);
-
     border-bottom-right-radius: var(--spacing-xs);
-
     margin-left: auto; 
-
+    /* Adding an inner glow to user bubbles */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
 }
 
 
@@ -250,13 +238,11 @@ h1 {
 .ai-message { justify-content: flex-start; }
 
 .ai-message .message-text {
-
     background-color: var(--color-ai-bubble);
-
     color: var(--color-text-dark); 
-
     border-bottom-left-radius: var(--spacing-xs); 
-
+    /* Crisp drop shadow for the light bubbles */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 
@@ -346,17 +332,14 @@ h1 {
 /* 5. INPUT & UPLOAD */
 
 .chat-input-container {
-
     width: 100%;
-
     display: flex;
-
     flex-direction: column;
-
     position: relative;
-
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
-
+    /* Soft neon anchor line */
+    border-top: 1px solid rgba(115, 176, 69, 0.3);
+    box-shadow: 0 -10px 20px rgba(115, 176, 69, 0.05);
+    padding-top: var(--spacing-sm);
 }
 
 
