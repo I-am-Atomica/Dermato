@@ -43,6 +43,8 @@ window.onload = function() {
         startMainAppFlow();
         return;
     }
+    
+    initCustomCursor();
 
     const mainSplashScreen = document.getElementById('splash-screen');
     const splashText = mainSplashScreen.querySelector('.splash-text');
@@ -533,4 +535,55 @@ function addTypingIndicator() {
         easing: 'easeOutBack'
     });
     return messageDiv;
+}
+
+// --- 6. CUSTOM CURSOR LOGIC ---
+function initCustomCursor() {
+    // Inject the cursor elements into the DOM
+    const cursorDot = document.createElement('div');
+    const cursorRim = document.createElement('div');
+    cursorDot.className = 'cursor-dot';
+    cursorRim.className = 'cursor-rim';
+    document.body.appendChild(cursorDot);
+    document.body.appendChild(cursorRim);
+
+    // Initial coordinates
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    let rimX = mouseX;
+    let rimY = mouseY;
+
+    // Track real mouse position instantly
+    window.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        // Dot moves exactly with the hardware mouse
+        cursorDot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
+    });
+
+    // Animation loop for the elastic trailing effect
+    function renderCursor() {
+        // Lerp factor of 0.15 means it closes 15% of the distance every frame
+        rimX += (mouseX - rimX) * 0.15;
+        rimY += (mouseY - rimY) * 0.15;
+        
+        cursorRim.style.transform = `translate3d(${rimX}px, ${rimY}px, 0)`;
+        requestAnimationFrame(renderCursor);
+    }
+    requestAnimationFrame(renderCursor);
+
+    // Global hover detection for interactive elements
+    document.addEventListener('mouseover', (e) => {
+        if (e.target.closest('button, input, a, label, .remove-btn, .icon-button')) {
+            cursorDot.classList.add('hovered');
+            cursorRim.classList.add('hovered');
+        }
+    });
+
+    document.addEventListener('mouseout', (e) => {
+        if (e.target.closest('button, input, a, label, .remove-btn, .icon-button')) {
+            cursorDot.classList.remove('hovered');
+            cursorRim.classList.remove('hovered');
+        }
+    });
 }
