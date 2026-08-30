@@ -670,3 +670,51 @@ audio::-webkit-media-controls-volume-slider {
     }
 
 }
+/* --- 8. CUSTOM CURSOR --- */
+body, a, button, input, label, select, textarea {
+    cursor: none !important; /* Hide native browser cursor */
+}
+
+.cursor-dot, .cursor-rim {
+    position: fixed;
+    top: 0; 
+    left: 0;
+    border-radius: 50%;
+    pointer-events: none; /* Prevents the cursor from blocking clicks */
+    z-index: 10000;
+}
+
+.cursor-dot {
+    width: 6px;
+    height: 6px;
+    margin-top: -3px; /* Centers the dot exactly on the mouse coordinates */
+    margin-left: -3px;
+    background-color: var(--primary); 
+    transition: background-color 0.3s ease;
+}
+
+.cursor-rim {
+    width: 32px;
+    height: 32px;
+    margin-top: -16px; /* Centers the rim */
+    margin-left: -16px;
+    border: 2px solid var(--primary); 
+    box-shadow: 0 0 10px rgba(255, 203, 154, 0.4);
+    /* Transition everything EXCEPT transform to ensure zero lag on the trail */
+    transition: width 0.3s ease, height 0.3s ease, margin 0.3s ease, border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover States (Expands and shifts to Cyan) */
+.cursor-dot.hovered {
+    background-color: #00FFFF; 
+}
+
+.cursor-rim.hovered {
+    width: 50px;
+    height: 50px;
+    margin-top: -25px;
+    margin-left: -25px;
+    border-color: #00FFFF;
+    background-color: rgba(0, 255, 255, 0.15); /* Soft inner glow fill */
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+}
