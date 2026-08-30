@@ -34,7 +34,7 @@ let audioChunks = [];
 let isRecording = false;
 let recordingTimer = null;
 let recordingSeconds = 0;
-const particleAnimations = []; // Tracks particles for the warp effect
+// Particle animation tracking array has been removed.
 
 // --- 1. STARTUP SEQUENCE ---
 window.onload = function() {
@@ -153,36 +153,35 @@ function spawnParticle(isInitial = false) {
     
     container.appendChild(p);
 
-    // FIX: Only base particles scatter on initial load. All specials start at the bottom.
-    const startY = (isInitial && type === 'base') 
+    // FIX: All particles randomly scatter on initial load. All respawns start at the very bottom.
+    const startY = isInitial 
         ? anime.random(-50, window.innerHeight) 
         : window.innerHeight + 100;
         
     const endY = -150;
     
+    // Calculate distance to keep the rise speed consistent regardless of where it spawned
     const totalDistance = window.innerHeight + 250;
     const distanceToTravel = startY - endY;
     const duration = (distanceToTravel / totalDistance) * baseDuration;
 
     // Custom Opacity Keyframes
-   if (type === 'flare') {
-        // Strict mapping to vertical percentage via timeline duration
+    if (type === 'flare') {
         opacityKeyframes = [
-            { value: 0, duration: duration * 0.10 }, // 0% - 10%: Spawn invisible
-            { value: 1, duration: duration * 0.25 }, // 10% - 35%: Peak intensity 
-            { value: 0.6, duration: duration * 0.05 }, // 35% - 40%: Begin fade
-            { value: 0, duration: duration * 0.30 }, // 40% - 70%: Fade to zero
-            { value: 0, duration: duration * 0.30 }  // 70% - 100%: Stay dead
+            { value: 0, duration: duration * 0.10 }, 
+            { value: 1, duration: duration * 0.25 }, 
+            { value: 0.6, duration: duration * 0.05 }, 
+            { value: 0, duration: duration * 0.30 }, 
+            { value: 0, duration: duration * 0.30 }  
         ];
     } else {
-        // Dynamic peak opacity based on particle class
         let peakOpacity;
         if (type === 'fat') {
-            peakOpacity = anime.random(0.2, 0.4); // Stays dim
+            peakOpacity = anime.random(0.2, 0.4); 
         } else if (type === 'zoomer') {
-            peakOpacity = anime.random(0.8, 1.0); // Forces near-max opacity for visibility
+            peakOpacity = anime.random(0.8, 1.0); 
         } else {
-            peakOpacity = anime.random(0.4, 0.9); // Standard random fade
+            peakOpacity = anime.random(0.4, 0.9); 
         }
         
         opacityKeyframes = [
@@ -202,12 +201,14 @@ function spawnParticle(isInitial = false) {
         duration: duration,
         easing: 'linear',
         complete: function() {
+            // The particle reached the top: Destroy it and respawn a new random type at the bottom
             p.remove();
             spawnParticle(false);
         }
     });
 }
 
+// Warp trigger function completely removed
 
 function animateTitle() {
     const title = document.querySelector('h1');
@@ -348,7 +349,6 @@ async function startRecording() {
         recordingSeconds = 0;
         recordingTimeDisplay.innerText = "0:00";
         
-        // Clear any rogue intervals before starting a new one
         clearInterval(recordingTimer);
         recordingTimer = setInterval(() => {
             recordingSeconds++;
@@ -447,7 +447,6 @@ async function callGeminiApi(userQuery, imageData, audioData) {
         parts.push({ inlineData: { mimeType: audioData.mimeType, data: audioData.data } });
     }
 
-    // Context-specific fallback prompts
     if (!userQuery) {
         if (imageData && audioData) {
             parts.push({ text: "Listen to the voice note regarding this skin condition image." });
@@ -490,7 +489,7 @@ async function handleSendMessage() {
     if (userQuery === "" && !currentImageBase64 && !currentAudioBase64) return;
 
     animateButton();
-    triggerParticleWarp(); // Triggers the particle speed boost
+    // Warp trigger call has been removed from here
 
     const imageToSend = currentImageBase64 ? { mimeType: currentImageMimeType, data: currentImageBase64 } : null;
     const audioToSend = currentAudioBase64 ? { mimeType: currentAudioMimeType, data: currentAudioBase64 } : null;
